@@ -31,7 +31,7 @@ public class PersonService {
         return personRepository.save(person);
     }
 
-    public Person updatePerson(UUID uuid, Person person) throws ValidationException{
+    public Person updatePerson(UUID uuid, Person person) throws ValidationException {
         Optional<Person> personOptional =
                 personRepository.findById(uuid);
 
