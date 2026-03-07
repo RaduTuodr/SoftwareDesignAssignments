@@ -6,13 +6,14 @@ import com.andrei.demo.model.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, UUID> {
     Enrollment getEnrollmentById(UUID id);
 
-    Enrollment getEnrollmentByCourse(Course course);
+    List<Enrollment> getEnrollmentsByCourse(Course course);
 
-    Enrollment getEnrollmentByPerson(Person person);
+    List<Enrollment> getEnrollmentsByPerson(Person person);
 }

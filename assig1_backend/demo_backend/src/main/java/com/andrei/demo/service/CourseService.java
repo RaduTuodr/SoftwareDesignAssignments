@@ -20,7 +20,8 @@ public class CourseService {
     public List<Course> getCourses() { return repository.findAll(); }
 
     public Course getCourseById(UUID uuid) {
-        return repository.findById(uuid).orElse(null);
+        return repository.findById(uuid).orElseThrow(
+                () -> new IllegalStateException("Course with id " + uuid + " not found"));
     }
 
     public Course getCourseByTitle(String title) {
@@ -30,7 +31,7 @@ public class CourseService {
 
     public List<Course> getCoursesByCredits(Integer credits) {
         return repository.findByCredits(credits).orElseThrow(
-                () -> new IllegalStateException("Course with credits " + credits + " not found"));
+                () -> new IllegalStateException("Courses with credits " + credits + " not found"));
     }
 
     public Course createCourse(CourseCreateDTO courseCreateDTO) {

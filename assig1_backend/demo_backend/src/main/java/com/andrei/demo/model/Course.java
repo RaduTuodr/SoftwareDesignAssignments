@@ -1,5 +1,6 @@
 package com.andrei.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -24,6 +25,7 @@ public class Course {
     @Column(name = "credits", nullable = false)
     private Integer credits;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Enrollment> enrollments = new ArrayList<>();
 }
