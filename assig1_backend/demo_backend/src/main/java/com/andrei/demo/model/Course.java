@@ -3,6 +3,8 @@ package com.andrei.demo.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -21,4 +23,7 @@ public class Course {
 
     @Column(name = "credits", nullable = false)
     private Integer credits;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Enrollment> enrollments = new ArrayList<>();
 }
