@@ -11,6 +11,8 @@ import java.util.UUID;
 @Entity
 @Data
 @Table(name = "person")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "person_type")
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
