@@ -45,10 +45,16 @@ public class PersonService {
             throw new ValidationException("Person with id " + uuid + " not found");
         }
         Person existingPerson = personOptional.get();
+        String newEmail = person.getEmail();
+
+        if (newEmail != null && !newEmail.equals(existingPerson.getEmail())
+                && personRepository.existsByEmailAndIdNot(newEmail, existingPerson.getId())) {
+            throw new DuplicateEmailException("Email " + newEmail + " already exists");
+        }
 
         existingPerson.setName(person.getName());
         existingPerson.setAge(person.getAge());
-        existingPerson.setEmail(person.getEmail());
+        existingPerson.setEmail(newEmail);
         existingPerson.setPassword(person.getPassword());
 
         return personRepository.save(existingPerson);
