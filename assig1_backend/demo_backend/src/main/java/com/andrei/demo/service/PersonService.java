@@ -1,5 +1,6 @@
 package com.andrei.demo.service;
 
+import com.andrei.demo.config.DuplicateEmailException;
 import com.andrei.demo.config.ValidationException;
 import com.andrei.demo.model.Person;
 import com.andrei.demo.model.PersonCreateDTO;
@@ -20,7 +21,12 @@ public class PersonService {
         return personRepository.findAll();
     }
 
-    public Person addPerson(PersonCreateDTO personDTO) {
+    public Person addPerson(PersonCreateDTO personDTO) throws DuplicateEmailException {
+
+        if (personRepository.existsByEmail(personDTO.getEmail())) {
+            throw new DuplicateEmailException("Email " + personDTO.getEmail() + " already exists");
+        }
+
         Person person = new Person();
 
         person.setName(personDTO.getName());

@@ -25,5 +25,6 @@ public class PersonCreateDTO {
     private Integer age;
 
     @NotBlank(message = "Email is required")
+    @Email
     private String email;
 }

@@ -1,5 +1,6 @@
 package com.andrei.demo.controller;
 
+import com.andrei.demo.config.DuplicateEmailException;
 import com.andrei.demo.config.ValidationException;
 import com.andrei.demo.model.PersonCreateDTO;
 import com.andrei.demo.service.PersonService;
@@ -35,7 +36,9 @@ public class PersonController {
     }
 
     @PostMapping("")
-    public Person addPerson(@Valid @RequestBody PersonCreateDTO personDTO) { return personService.addPerson(personDTO); }
+    public Person addPerson(@Valid @RequestBody PersonCreateDTO personDTO)
+            throws DuplicateEmailException
+    { return personService.addPerson(personDTO); }
 
     @PutMapping("/{uuid}")
     public Person updatePerson(@PathVariable UUID uuid, @RequestBody Person person) throws ValidationException { return personService.updatePerson(uuid, person); }

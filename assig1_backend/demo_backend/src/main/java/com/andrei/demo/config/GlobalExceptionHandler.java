@@ -2,6 +2,7 @@ package com.andrei.demo.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,6 +30,14 @@ public class GlobalExceptionHandler {
         log.error("Validation error: {}", errorMap);
 
         return errorMap;
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(DuplicateEmailException.class)
+    public Map<String, String> handleDuplicateEmailException(DuplicateEmailException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("email", ex.getMessage());
+        return errors;
     }
 }
 
