@@ -2,6 +2,7 @@ package com.andrei.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class Person {
 
     private Integer age;
 
+    @Email
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 

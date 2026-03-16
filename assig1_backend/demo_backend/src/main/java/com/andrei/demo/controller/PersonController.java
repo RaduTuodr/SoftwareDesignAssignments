@@ -41,7 +41,7 @@ public class PersonController {
     { return personService.addPerson(personDTO); }
 
     @PutMapping("/{uuid}")
-    public Person updatePerson(@PathVariable UUID uuid, @RequestBody Person person) throws ValidationException { return personService.updatePerson(uuid, person); }
+    public Person updatePerson(@PathVariable UUID uuid, @Valid @RequestBody Person person) throws ValidationException { return personService.updatePerson(uuid, person); }
 
     @DeleteMapping("/{uuid}")
     public void deletePerson(@PathVariable UUID uuid) {
