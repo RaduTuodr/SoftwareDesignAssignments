@@ -1,4 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { CreatePersonDto, Person, UpdatePersonDto } from '../../models/person.model';
 import { PersonService } from '../../services/person.service';
@@ -10,6 +11,7 @@ export class PersonListStore {
 
   readonly persons = signal<Person[]>([]);
   readonly hasError = signal(false);
+  readonly error = signal<HttpErrorResponse | null>(null);
   readonly isLoading = computed(() => this.pendingRequests() > 0);
 
   private beginRequest(): void {
@@ -28,7 +30,10 @@ export class PersonListStore {
       .pipe(finalize(() => this.endRequest()))
       .subscribe({
         next: (data) => this.persons.set(data),
-        error: () => this.hasError.set(true),
+        error: (err) => {
+          this.hasError.set(true);
+          this.error.set(err);
+        }
       });
   }
 
@@ -40,7 +45,10 @@ export class PersonListStore {
       .pipe(finalize(() => this.endRequest()))
       .subscribe({
         next: (created) => this.persons.update((list) => [...list, created]),
-        error: () => this.hasError.set(true),
+        error: (err) => {
+          this.hasError.set(true);
+          this.error.set(err);
+        }
       });
   }
 
@@ -60,7 +68,10 @@ export class PersonListStore {
           this.persons.update((list) =>
             list.map((person) => (person.id === updated.id ? updated : person)),
           ),
-        error: () => this.hasError.set(true),
+        error: (err) => {
+          this.hasError.set(true);
+          this.error.set(err);
+        }
       });
   }
 
@@ -73,7 +84,10 @@ export class PersonListStore {
       .subscribe({
         next: () =>
           this.persons.update((list) => list.filter((person) => person.id !== id)),
-        error: () => this.hasError.set(true),
+        error: (err) => {
+          this.hasError.set(true);
+          this.error.set(err);
+        }
       });
   }
 }

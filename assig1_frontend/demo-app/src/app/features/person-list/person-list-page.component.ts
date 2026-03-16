@@ -28,8 +28,17 @@ export class PersonListPageComponent {
 
   protected readonly persons = this.store.persons;
   protected readonly hasError = this.store.hasError;
+  protected readonly error = this.store.error;
   protected readonly isLoading = this.store.isLoading;
   protected readonly displayedColumns = ['name', 'age', 'email', 'actions'];
+
+  protected getErrorDetails(): string[] {
+    const err = this.error();
+    if (err?.error && typeof err.error === 'object') {
+      return Object.entries(err.error).map(([key, value]) => `${key}: ${value}`);
+    }
+    return [];
+  }
 
   constructor() {
     this.store.load();

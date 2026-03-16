@@ -25,7 +25,18 @@
   @if (hasError()) {
     <div class="error-alert" role="alert" aria-live="assertive">
       <mat-icon aria-hidden="true">error_outline</mat-icon>
-      An error occurred while processing your request. Please try again.
+      @if (getErrorDetails().length > 0) {
+        <div>
+          <strong>Validation errors:</strong>
+          <ul>
+            @for (detail of getErrorDetails(); track detail) {
+              <li>{{ detail }}</li>
+            }
+          </ul>
+        </div>
+      } @else {
+        An error occurred: {{ error()?.error || error()?.message || 'Unknown error' }}
+      }
     </div>
   }
 
