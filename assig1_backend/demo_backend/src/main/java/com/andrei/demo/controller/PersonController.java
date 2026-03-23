@@ -43,6 +43,9 @@ public class PersonController {
     @PutMapping("/{uuid}")
     public Person updatePerson(@PathVariable UUID uuid, @Valid @RequestBody Person person) throws ValidationException { return personService.updatePerson(uuid, person); }
 
+    @PatchMapping("/{uuid}")
+    public Person partialUpdatePerson(@PathVariable UUID uuid, @RequestBody Person person) throws ValidationException, DuplicateEmailException { return personService.partialUpdatePerson(uuid, person); }
+
     @DeleteMapping("/{uuid}")
     public void deletePerson(@PathVariable UUID uuid) {
         personService.deletePerson(uuid);

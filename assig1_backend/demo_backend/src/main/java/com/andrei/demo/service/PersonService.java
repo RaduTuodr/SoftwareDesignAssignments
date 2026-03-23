@@ -75,6 +75,36 @@ public class PersonService {
                         );
     }
 
+    public Person partialUpdatePerson(UUID uuid, Person person) throws ValidationException {
+        Optional<Person> personOptional = personRepository.findById(uuid);
+
+        if(personOptional.isEmpty()) {
+            throw new ValidationException("Person with id " + uuid + "not found");
+        }
+        Person existingPerson = personOptional.get();
+
+        if (person.getName() != null) {
+            existingPerson.setName(person.getName());
+        }
+        if (person.getAge() != null) {
+            existingPerson.setAge(person.getAge());
+        }
+
+        if (person.getEmail() != null) {
+            if (!person.getEmail().equals(existingPerson.getEmail())
+                    && personRepository.existsByEmailAndIdNot(person.getEmail(), existingPerson.getId())) {
+                throw new DuplicateEmailException("Email " + person.getEmail() + "already exists");
+            }
+            existingPerson.setEmail(person.getEmail());
+        }
+
+        if (person.getPassword() != null) {
+            existingPerson.setPassword(person.getPassword());
+        }
+
+        return personRepository.save(existingPerson);
+    }
+
     public void deletePerson(UUID uuid) {
         personRepository.deleteById(uuid);
     }

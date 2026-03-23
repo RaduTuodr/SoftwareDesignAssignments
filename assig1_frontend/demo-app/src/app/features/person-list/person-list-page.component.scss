@@ -66,3 +66,26 @@
 .delete-btn {
   color: #c62828;
 }
+
+.role-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.role-person {
+  background-color: #e0e0e0;
+  color: #424242;
+}
+
+.role-student {
+  background-color: #c8e6c9;
+  color: #1b5e20;
+}
+
+.role-professor {
+  background-color: #bbdefb;
+  color: #0d47a1;
+}

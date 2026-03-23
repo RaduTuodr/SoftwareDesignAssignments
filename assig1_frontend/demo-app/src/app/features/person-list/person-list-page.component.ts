@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -16,7 +17,7 @@ import { PersonListStore } from './person-list.store';
 
 @Component({
   selector: 'app-person-list-page',
-  imports: [MatTableModule, MatButtonModule, MatIconModule, MatDialogModule, MatToolbar],
+  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, MatDialogModule, MatToolbar],
   templateUrl: './person-list-page.component.html',
   styleUrl: './person-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,7 +31,33 @@ export class PersonListPageComponent {
   protected readonly hasError = this.store.hasError;
   protected readonly error = this.store.error;
   protected readonly isLoading = this.store.isLoading;
-  protected readonly displayedColumns = ['name', 'age', 'email', 'actions'];
+  protected readonly displayedColumns = ['name', 'age', 'email', 'personType', 'actions'];
+
+  protected getPersonType(person: Person): 'Person' | 'Student' | 'Professor' {
+    const maybeStudent = person as Person & { registrationNumber: string };
+    if (maybeStudent.registrationNumber !== undefined) {
+      return 'Student';
+    }
+
+    const maybeProfessor = person as Person & { department: string };
+
+    if (maybeProfessor.department !== undefined) {
+      return 'Professor';
+    }
+
+    return 'Person';
+  }
+
+  protected getPersonTypeClass(person: Person): 'role-person' | 'role-student' | 'role-professor' {
+    const type = this.getPersonType(person);
+    if (type === 'Student') {
+      return 'role-student';
+    }
+    if (type === 'Professor') {
+      return 'role-professor';
+    }
+    return 'role-person';
+  }
 
   protected getErrorDetails(): string[] {
     const err = this.error();
