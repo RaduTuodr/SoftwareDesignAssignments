@@ -50,7 +50,17 @@ export class LoginComponent {
           return;
         }
 
-        void this.router.navigate(['/people']);
+        const normalizedRole = response.role?.trim().toLowerCase();
+        console.log(response);
+        console.log(normalizedRole);
+        const targetRoute =
+          normalizedRole === 'student'
+            ? '/students'
+            : normalizedRole === 'professor'
+              ? '/professors'
+              : '/people';
+
+        void this.router.navigate([targetRoute]);
       });
   }
 }

@@ -25,7 +25,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/student-list/student-list-page.component').then(
         (m) => m.StudentListPageComponent,
-      )
+      ),
+  },
+  {
+    path: 'professors',
+    loadComponent: () =>
+      import('./features/professor-list/professor-list-page.component').then(
+        (m) => m.ProfessorListPageComponent,
+      ),
   },
   {
     path: 'error',

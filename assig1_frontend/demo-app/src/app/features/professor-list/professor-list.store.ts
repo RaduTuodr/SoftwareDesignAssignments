@@ -1,15 +1,19 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
-import { CreateStudentDto, Student, UpdateStudentDto } from '../../models/student.model';
-import { StudentService } from '../../services/student.service';
+import {
+  CreateProfessorDto,
+  Professor,
+  UpdateProfessorDto,
+} from '../../models/professor.model';
+import { ProfessorService } from '../../services/professor.service';
 
 @Injectable({ providedIn: 'root' })
-export class StudentListStore {
-  private readonly studentService = inject(StudentService);
+export class ProfessorListStore {
+  private readonly professorService = inject(ProfessorService);
   private readonly pendingRequests = signal(0);
 
-  readonly students = signal<Student[]>([]);
+  readonly professors = signal<Professor[]>([]);
   readonly hasError = signal(false);
   readonly error = signal<HttpErrorResponse | null>(null);
   readonly isLoading = computed(() => this.pendingRequests() > 0);
@@ -22,77 +26,76 @@ export class StudentListStore {
     this.pendingRequests.update((count) => Math.max(0, count - 1));
   }
 
-  private isStudent(student: any): student is Student {
-    return student && typeof student === 'object' &&
-           'id' in student && 'name' in student && 'registrationNumber' in student && 'graduationYear' in student;
+  private isProfessor(professor: any): professor is Professor {
+    return professor && typeof professor === 'object' &&
+           'id' in professor && 'name' in professor && 'department' in professor && 'academicRank' in professor;
   }
 
   load(): void {
     this.hasError.set(false);
     this.beginRequest();
-    this.studentService
+    this.professorService
       .getAll()
       .pipe(finalize(() => this.endRequest()))
       .subscribe({
-        next: (data) => this.students.set(data),
+        next: (data) => this.professors.set(data),
         error: (err) => {
           this.hasError.set(true);
           this.error.set(err);
-        }
+        },
       });
   }
 
-  create(dto: CreateStudentDto): void {
+  create(dto: CreateProfessorDto): void {
     this.hasError.set(false);
     this.beginRequest();
-    this.studentService
+    this.professorService
       .create(dto)
       .pipe(finalize(() => this.endRequest()))
       .subscribe({
         next: (created) => {
-          this.students.update((list) => [...list, created]);
+          this.professors.update((list) => [...list, created]);
         },
         error: (err) => {
           this.hasError.set(true);
           this.error.set(err);
-        }
+        },
       });
   }
 
-  update(id: string, dto: UpdateStudentDto): void {
-    const existing = this.students().find((item) => item.id === id);
+  update(id: string, dto: UpdateProfessorDto): void {
+    const existing = this.professors().find((item) => item.id === id);
     if (!existing) return;
 
     this.hasError.set(false);
     this.beginRequest();
-    this.studentService
+    this.professorService
       .update(id, dto)
       .pipe(finalize(() => this.endRequest()))
       .subscribe({
         next: (updated) =>
-          this.students.update((list) =>
+          this.professors.update((list) =>
             list.map((item) => (item.id === updated.id ? updated : item)),
           ),
         error: (err) => {
           this.hasError.set(true);
           this.error.set(err);
-        }
+        },
       });
   }
 
   remove(id: string): void {
     this.hasError.set(false);
     this.beginRequest();
-    this.studentService
+    this.professorService
       .delete(id)
       .pipe(finalize(() => this.endRequest()))
       .subscribe({
-        next: () =>
-          this.students.update((list) => list.filter((student) => student.id !== id)),
+        next: () => this.professors.update((list) => list.filter((professor) => professor.id !== id)),
         error: (err) => {
           this.hasError.set(true);
           this.error.set(err);
-        }
+        },
       });
   }
 }

@@ -2,6 +2,8 @@ package com.andrei.demo.service;
 
 import com.andrei.demo.model.LoginResponse;
 import com.andrei.demo.model.Person;
+import com.andrei.demo.model.Professor;
+import com.andrei.demo.model.Student;
 import com.andrei.demo.repository.PersonRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,15 @@ public class SecurityService {
         }
         Person person = maybePerson.get();
         if(person.getPassword().equals(password)) {
-            return new LoginResponse(true, "ADMIN", null);
+            String role;
+            if (person instanceof Student) {
+                role = "STUDENT";
+            } else if (person instanceof Professor) {
+                role = "PROFESSOR";
+            } else {
+                role = "VIEWER";
+            }
+            return new LoginResponse(true, role, null);
         } else {
             return new LoginResponse(false, null, "Incorrect password");
         }

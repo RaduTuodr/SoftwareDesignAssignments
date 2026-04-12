@@ -6,19 +6,19 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbar } from '@angular/material/toolbar';
+import { Router } from '@angular/router';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog/confirm-delete-dialog.component';
 import {
-  StudentFormDialogComponent,
-  StudentFormDialogData,
-  StudentFormDialogResult,
-} from '../../components/student-form-dialog/student-form-dialog.component';
-import { Student, UpdateStudentDto, CreateStudentDto } from '../../models/student.model';
-import { StudentListStore } from './student-list.store';
-import { Router } from '@angular/router';
+  ProfessorFormDialogComponent,
+  ProfessorFormDialogData,
+  ProfessorFormDialogResult,
+} from '../../components/professor-form-dialog/professor-form-dialog.component';
+import { Professor, UpdateProfessorDto, CreateProfessorDto } from '../../models/professor.model';
 import { LoginStore } from '../login/login.store';
+import { ProfessorListStore } from './professor-list.store';
 
 @Component({
-  selector: 'app-student-list-page',
+  selector: 'app-professor-list-page',
   imports: [
     CommonModule,
     MatTableModule,
@@ -27,33 +27,26 @@ import { LoginStore } from '../login/login.store';
     MatDialogModule,
     MatToolbar,
   ],
-  templateUrl: './student-list-page.component.html',
-  styleUrl: './student-list-page.component.scss',
+  templateUrl: './professor-list-page.component.html',
+  styleUrl: './professor-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StudentListPageComponent {
+export class ProfessorListPageComponent {
   private readonly dialog = inject(MatDialog);
-  private readonly store = inject(StudentListStore);
+  private readonly store = inject(ProfessorListStore);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly loginStore = inject(LoginStore);
   private readonly router = inject(Router);
 
-  protected readonly students = this.store.students;
+  protected readonly professors = this.store.professors;
   protected readonly hasError = this.store.hasError;
   protected readonly error = this.store.error;
   protected readonly isLoading = this.store.isLoading;
-  protected readonly displayedColumns = [
-    'name',
-    'age',
-    'email',
-    'registrationNumber',
-    'graduationYear',
-    'actions',
-  ];
+  protected readonly displayedColumns = ['name', 'age', 'email', 'department', 'academicRank', 'actions'];
 
-  protected readonly pageTitle = 'Manage Students';
-  protected readonly pageSubtitle = 'View, create, edit, and delete student records.';
+  protected readonly pageTitle = 'Manage Professors';
+  protected readonly pageSubtitle = 'View, edit, and delete professor records.';
 
   constructor() {
     this.store.load();
@@ -73,51 +66,51 @@ export class StudentListPageComponent {
     }
 
     this.dialog
-      .open<StudentFormDialogComponent, StudentFormDialogData, StudentFormDialogResult>(
-        StudentFormDialogComponent,
-        { data: { title: 'Create Student', submitLabel: 'Create' } },
+      .open<ProfessorFormDialogComponent, ProfessorFormDialogData, ProfessorFormDialogResult>(
+        ProfessorFormDialogComponent,
+        { data: { title: 'Create Professor', submitLabel: 'Create' } },
       )
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
         if (!result) return;
-        this.store.create(result as CreateStudentDto);
+        this.store.create(result as CreateProfessorDto);
       });
   }
 
-  protected openEditDialog(student: Student): void {
+  protected openEditDialog(professor: Professor): void {
     if (this.isLoading()) {
       return;
     }
 
     this.dialog
-      .open<StudentFormDialogComponent, StudentFormDialogData, StudentFormDialogResult>(
-        StudentFormDialogComponent,
-        { data: { title: 'Edit Student', submitLabel: 'Save', initialValue: student } },
+      .open<ProfessorFormDialogComponent, ProfessorFormDialogData, ProfessorFormDialogResult>(
+        ProfessorFormDialogComponent,
+        { data: { title: 'Edit Professor', submitLabel: 'Save', initialValue: professor } },
       )
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
         if (!result) return;
-        this.store.update(student.id, result as UpdateStudentDto);
+        this.store.update(professor.id, result as UpdateProfessorDto);
       });
   }
 
-  protected openDeleteDialog(student: Student): void {
+  protected openDeleteDialog(professor: Professor): void {
     if (this.isLoading()) {
       return;
     }
 
     this.dialog
-      .open<ConfirmDeleteDialogComponent, { person: Student }, boolean>(
+      .open<ConfirmDeleteDialogComponent, { person: Professor }, boolean>(
         ConfirmDeleteDialogComponent,
-        { data: { person: student } },
+        { data: { person: professor } },
       )
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((confirmed) => {
         if (!confirmed) return;
-        this.store.remove(student.id);
+        this.store.remove(professor.id);
       });
   }
 
