@@ -4,6 +4,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbar } from '@angular/material/toolbar';
 import { Router } from '@angular/router';
@@ -25,6 +28,9 @@ import { ProfessorListStore } from './professor-list.store';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
     MatToolbar,
   ],
   templateUrl: './professor-list-page.component.html',
@@ -40,6 +46,11 @@ export class ProfessorListPageComponent {
   private readonly router = inject(Router);
 
   protected readonly professors = this.store.professors;
+  protected readonly filteredProfessors = this.store.filteredProfessors;
+  protected readonly rankOptions = this.store.rankOptions;
+  protected readonly departmentSearch = this.store.departmentSearch;
+  protected readonly selectedRank = this.store.selectedRank;
+  protected readonly sortDirection = this.store.sortDirection;
   protected readonly hasError = this.store.hasError;
   protected readonly error = this.store.error;
   protected readonly isLoading = this.store.isLoading;
@@ -112,6 +123,18 @@ export class ProfessorListPageComponent {
         if (!confirmed) return;
         this.store.remove(professor.id);
       });
+  }
+
+  protected updateDepartmentSearch(value: string): void {
+    this.store.setDepartmentSearch(value);
+  }
+
+  protected updateRankFilter(value: string): void {
+    this.store.setRankFilter(value);
+  }
+
+  protected toggleSortDirection(): void {
+    this.store.toggleSortDirection();
   }
 
   protected logout(): void {

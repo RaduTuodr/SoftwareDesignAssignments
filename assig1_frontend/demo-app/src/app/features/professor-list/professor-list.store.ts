@@ -14,6 +14,30 @@ export class ProfessorListStore {
   private readonly pendingRequests = signal(0);
 
   readonly professors = signal<Professor[]>([]);
+  readonly departmentSearch = signal('');
+  readonly selectedRank = signal('All');
+  readonly sortDirection = signal<'asc' | 'desc'>('asc');
+
+  private static readonly availableRanks = [
+    'Assistant Professor',
+    'Associate Professor',
+    'Professor',
+    'Distinguished Professor',
+  ] as const;
+
+  readonly rankOptions = computed(() => ['All', ...ProfessorListStore.availableRanks]);
+
+  readonly filteredProfessors = computed(() => {
+    const search = this.departmentSearch().trim().toLowerCase();
+    const selectedRank = this.selectedRank();
+    const sorted = [...this.professors()]
+      .filter((professor) => professor.department.toLowerCase().includes(search))
+      .filter((professor) => selectedRank === 'All' || professor.academicRank === selectedRank)
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+
+    return this.sortDirection() === 'asc' ? sorted : sorted.reverse();
+  });
+
   readonly hasError = signal(false);
   readonly error = signal<HttpErrorResponse | null>(null);
   readonly isLoading = computed(() => this.pendingRequests() > 0);
@@ -44,6 +68,18 @@ export class ProfessorListStore {
           this.error.set(err);
         },
       });
+  }
+
+  setDepartmentSearch(value: string): void {
+    this.departmentSearch.set(value);
+  }
+
+  setRankFilter(value: string): void {
+    this.selectedRank.set(value);
+  }
+
+  toggleSortDirection(): void {
+    this.sortDirection.update((current) => (current === 'asc' ? 'desc' : 'asc'));
   }
 
   create(dto: CreateProfessorDto): void {

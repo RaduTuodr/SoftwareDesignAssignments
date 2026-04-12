@@ -24,6 +24,20 @@
   color: #555;
 }
 
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+.filter-field {
+  min-width: 220px;
+  flex: 1 1 220px;
+  max-width: 320px;
+}
+
 .error-alert {
   display: flex;
   align-items: center;

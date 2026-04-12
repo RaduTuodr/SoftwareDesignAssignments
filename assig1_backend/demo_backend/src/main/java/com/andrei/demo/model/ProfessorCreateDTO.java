@@ -4,6 +4,7 @@ import com.andrei.demo.validator.StrongPassword;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -26,5 +27,8 @@ public class ProfessorCreateDTO {
 
     private String department;
 
+    @Pattern(regexp = "^(Assistant Professor|Associate Professor|Professor|Distinguished Professor)$",
+            message = "Academic rank must be one of: Assistant Professor, Associate Professor, " +
+                    "Professor, Distinguished Professor")
     private String academicRank;
 }
