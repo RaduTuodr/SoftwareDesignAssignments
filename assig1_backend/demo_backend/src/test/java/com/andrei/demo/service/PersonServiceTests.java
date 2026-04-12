@@ -1,25 +1,26 @@
 package com.andrei.demo.service;
 
+import com.andrei.demo.config.DuplicateEmailException;
 import com.andrei.demo.config.ValidationException;
-import com.andrei.demo.model.LoginResponse;
 import com.andrei.demo.model.Person;
 import com.andrei.demo.model.PersonCreateDTO;
 import com.andrei.demo.repository.PersonRepository;
-import lombok.SneakyThrows;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class PersonServiceTests {
 
     @Mock
@@ -28,113 +29,197 @@ class PersonServiceTests {
     @InjectMocks
     private PersonService personService;
 
-    private AutoCloseable closeable;
+    private Person person;
 
     @BeforeEach
     void setUp() {
-        closeable = MockitoAnnotations.openMocks(this);
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        closeable.close();
-    }
-
-    @Test
-    void testGetPeople() {
-        // given:
-        List<Person> people = List.of(new Person(), new Person());
-
-        // when:
-        when(personRepository.findAll()).thenReturn(people);
-        List<Person> result = personService.getPeople();
-
-        // then:
-        assertEquals(2, result.size());
-        verify(personRepository, times(1)).findAll();
-        assertEquals(people, result);
-    }
-
-    @SneakyThrows
-    @Test
-    void testAddPerson() {
-        // given:
-        PersonCreateDTO personDTO = new PersonCreateDTO();
-        personDTO.setName("John");
-        personDTO.setPassword("password");
-        personDTO.setAge(30);
-        personDTO.setEmail("john@example.com");
-
-        Person savedPerson = new Person();
-        savedPerson.setId(UUID.randomUUID());
-        savedPerson.setName("John");
-        savedPerson.setAge(30);
-        savedPerson.setEmail("john@example.com");
-        savedPerson.setPassword("password");
-
-        // when:
-        when(personRepository.save(any(Person.class))).thenReturn(savedPerson);
-        Person result = personService.addPerson(personDTO);
-
-        // then:
-        assertEquals(savedPerson, result);
-        assertNotNull(result.getId());
-        verify(personRepository, times(1)).save(any(Person.class));
-    }
-
-    @Test
-    void testUpdatePerson() throws ValidationException {
-        // given:
-        UUID uuid = UUID.randomUUID();
-        Person person = new Person();
-        person.setId(uuid);
+        person = new Person();
+        person.setId(UUID.randomUUID());
         person.setName("John");
         person.setAge(30);
         person.setEmail("john@example.com");
-        person.setPassword("password");
+        person.setPassword("Pass123!");
+    }
 
-        Person updatedPerson = new Person();
-        updatedPerson.setId(uuid);
-        updatedPerson.setName("Jane");
-        updatedPerson.setAge(25);
-        updatedPerson.setEmail("jane@example.com");
-        updatedPerson.setPassword("newpassword");
+    @Test
+    void getPeopleReturnsAll() {
+        when(personRepository.findAll()).thenReturn(List.of(person));
 
-        // when:
-        when(personRepository.findById(uuid)).thenReturn(Optional.of(person));
-        when(personRepository.save(any())).thenReturn(updatedPerson);
-        Person result = personService.updatePerson(uuid, updatedPerson);
+        List<Person> result = personService.getPeople();
 
-        // then:
+        assertEquals(1, result.size());
+        assertEquals(person, result.getFirst());
+    }
+
+    @Test
+    void addPersonThrowsWhenEmailExists() {
+        PersonCreateDTO dto = new PersonCreateDTO();
+        dto.setEmail("john@example.com");
+        when(personRepository.existsByEmail(dto.getEmail())).thenReturn(true);
+
+        assertThrows(DuplicateEmailException.class, () -> personService.addPerson(dto));
+        verify(personRepository, never()).save(any());
+    }
+
+    @Test
+    void addPersonSavesMappedEntity() {
+        PersonCreateDTO dto = new PersonCreateDTO();
+        dto.setName("Alice");
+        dto.setAge(22);
+        dto.setEmail("alice@example.com");
+        dto.setPassword("Strong123!");
+
+        when(personRepository.existsByEmail(dto.getEmail())).thenReturn(false);
+        when(personRepository.save(any(Person.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        try {
+            Person result = personService.addPerson(dto);
+
+            assertEquals("Alice", result.getName());
+            assertEquals("alice@example.com", result.getEmail());
+        } catch (ValidationException e) {
+            fail("ValidationException should not be thrown");
+        }
+    }
+
+    @Test
+    void updatePersonThrowsWhenMissing() {
+        UUID id = UUID.randomUUID();
+        when(personRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(ValidationException.class, () -> personService.updatePerson(id, new Person()));
+    }
+
+    @Test
+    void updatePersonThrowsWhenEmailAlreadyUsed() {
+        UUID id = person.getId();
+        Person patch = new Person();
+        patch.setEmail("taken@example.com");
+
+        when(personRepository.findById(id)).thenReturn(Optional.of(person));
+        when(personRepository.existsByEmailAndIdNot("taken@example.com", id)).thenReturn(true);
+
+        assertThrows(DuplicateEmailException.class, () -> personService.updatePerson(id, patch));
+    }
+
+    @Test
+    void updatePersonUpdatesEntity() throws ValidationException {
+        UUID id = person.getId();
+        Person patch = new Person();
+        patch.setName("Jane");
+        patch.setAge(21);
+        patch.setEmail("jane@example.com");
+        patch.setPassword("Other123!");
+
+        when(personRepository.findById(id)).thenReturn(Optional.of(person));
+        when(personRepository.existsByEmailAndIdNot("jane@example.com", id)).thenReturn(false);
+        when(personRepository.save(person)).thenReturn(person);
+
+        Person result = personService.updatePerson(id, patch);
+
         assertEquals("Jane", result.getName());
-        verify(personRepository, times(1)).findById(uuid);
-        verify(personRepository, times(1)).save(updatedPerson);
+        assertEquals("jane@example.com", result.getEmail());
     }
 
     @Test
-    void testUpdatePersonNotFound() {
-        // given:
-        UUID uuid = UUID.randomUUID();
-        Person person = new Person();
+    void updatePerson2UpdatesWhenFound() throws ValidationException {
+        UUID id = person.getId();
+        Person patch = new Person();
+        patch.setName("MapName");
 
-        // when:
-        when(personRepository.findById(uuid)).thenReturn(Optional.empty());
+        when(personRepository.findById(id)).thenReturn(Optional.of(person));
+        when(personRepository.save(person)).thenReturn(person);
 
-        // then:
-        assertThrows(ValidationException.class, () -> personService.updatePerson(uuid, person));
-        verify(personRepository, times(1)).findById(uuid);
+        Person result = personService.updatePerson2(id, patch);
+
+        assertEquals("MapName", result.getName());
     }
 
     @Test
-    void testDeletePerson() {
-        // given:
-        UUID uuid = UUID.randomUUID();
+    void updatePerson2ThrowsWhenMissing() {
+        UUID id = UUID.randomUUID();
+        when(personRepository.findById(id)).thenReturn(Optional.empty());
 
-        // when:
-        doNothing().when(personRepository).deleteById(uuid);
-        personService.deletePerson(uuid);
+        assertThrows(ValidationException.class, () -> personService.updatePerson2(id, new Person()));
+    }
 
-        // then:
-        verify(personRepository, times(1)).deleteById(uuid);
+    @Test
+    void partialUpdatePersonUpdatesOnlyProvidedFields() throws ValidationException {
+        UUID id = person.getId();
+        Person patch = new Person();
+        patch.setName("Partial");
+        patch.setEmail("partial@example.com");
+
+        when(personRepository.findById(id)).thenReturn(Optional.of(person));
+        when(personRepository.existsByEmailAndIdNot("partial@example.com", id)).thenReturn(false);
+        when(personRepository.save(person)).thenReturn(person);
+
+        Person result = personService.partialUpdatePerson(id, patch);
+
+        assertEquals("Partial", result.getName());
+        assertEquals(30, result.getAge());
+        assertEquals("partial@example.com", result.getEmail());
+    }
+
+    @Test
+    void partialUpdatePersonThrowsWhenEmailAlreadyUsed() {
+        UUID id = person.getId();
+        Person patch = new Person();
+        patch.setEmail("taken@example.com");
+
+        when(personRepository.findById(id)).thenReturn(Optional.of(person));
+        when(personRepository.existsByEmailAndIdNot("taken@example.com", id)).thenReturn(true);
+
+        assertThrows(DuplicateEmailException.class, () -> personService.partialUpdatePerson(id, patch));
+    }
+
+    @Test
+    void partialUpdatePersonThrowsWhenMissing() {
+        UUID id = UUID.randomUUID();
+        when(personRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(ValidationException.class, () -> personService.partialUpdatePerson(id, new Person()));
+    }
+
+    @Test
+    void deletePersonDelegatesToRepository() {
+        UUID id = UUID.randomUUID();
+
+        personService.deletePerson(id);
+
+        verify(personRepository).deleteById(id);
+    }
+
+    @Test
+    void getPersonByEmailThrowsWhenMissing() {
+        when(personRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalStateException.class, () -> personService.getPersonByEmail("missing@example.com"));
+    }
+
+    @Test
+    void getPersonByEmailReturnsValue() {
+        when(personRepository.findByEmail(person.getEmail())).thenReturn(Optional.of(person));
+
+        Person result = personService.getPersonByEmail(person.getEmail());
+
+        assertEquals(person, result);
+    }
+
+    @Test
+    void getPersonByIdThrowsWhenMissing() {
+        UUID id = UUID.randomUUID();
+        when(personRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalStateException.class, () -> personService.getPersonById(id));
+    }
+
+    @Test
+    void getPersonByIdReturnsValue() {
+        when(personRepository.findById(person.getId())).thenReturn(Optional.of(person));
+
+        Person result = personService.getPersonById(person.getId());
+
+        assertEquals(person, result);
     }
 }
