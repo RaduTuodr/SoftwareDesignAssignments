@@ -69,6 +69,18 @@ export class PersonListPageComponent {
     return 'role-person';
   }
 
+  protected navigateToPersonType(person: Person): void {
+    const type = this.getPersonType(person);
+    if (type === 'Student') {
+      void this.router.navigate(['/students']);
+      return;
+    }
+    if (type === 'Professor') {
+      void this.router.navigate(['/professors']);
+      return;
+    }
+  }
+
   protected getErrorDetails(): string[] {
     const err = this.error();
     if (err?.error && typeof err.error === 'object') {

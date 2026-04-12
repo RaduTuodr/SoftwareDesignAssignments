@@ -68,11 +68,16 @@
 }
 
 .role-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 4px 10px;
   border-radius: 999px;
   font-weight: 600;
   line-height: 1.2;
+  min-height: 0;
+  white-space: nowrap;
+  text-decoration: none;
 }
 
 .role-person {
@@ -89,6 +94,32 @@
   background-color: #bbdefb;
   color: #0d47a1;
 }
+
+.role-link {
+  text-transform: none;
+  font-weight: 600;
+  line-height: 1.2;
+  color: inherit !important;
+
+  min-width: 0 !important;
+  height: auto !important;
+  padding: 4px 10px !important;
+  letter-spacing: normal;
+
+  ::ng-deep .mat-mdc-button-touch-target {
+    height: 100%;
+  }
+
+  ::ng-deep .mdc-button__label {
+    line-height: 1.2;
+  }
+}
+
+.role-link:hover,
+.role-link:focus-visible {
+  opacity: 0.9;
+}
+
 
 .page-toolbar {
   .toolbar-title {

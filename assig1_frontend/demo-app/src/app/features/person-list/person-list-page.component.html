@@ -72,9 +72,23 @@
       <ng-container matColumnDef="personType">
         <th mat-header-cell *matHeaderCellDef scope="col">Person Type</th>
         <td mat-cell *matCellDef="let person">
-          <span class="role-badge" [ngClass]="getPersonTypeClass(person)">
-            {{ getPersonType(person) }}
-          </span>
+          @if (getPersonType(person) === 'Person') {
+            <span class="role-badge" [ngClass]="getPersonTypeClass(person)">
+              {{ getPersonType(person) }}
+            </span>
+          } @else {
+            <button
+              mat-button
+              type="button"
+              class="role-badge role-link"
+              [ngClass]="getPersonTypeClass(person)"
+              (click)="navigateToPersonType(person)"
+              [disabled]="isLoading()"
+              [attr.aria-label]="'Go to ' + getPersonType(person) + ' page'"
+            >
+              {{ getPersonType(person) }}
+            </button>
+          }
         </td>
       </ng-container>
 
