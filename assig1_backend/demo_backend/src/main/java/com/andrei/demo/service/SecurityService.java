@@ -6,6 +6,7 @@ import com.andrei.demo.model.Professor;
 import com.andrei.demo.model.Student;
 import com.andrei.demo.repository.PersonRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -14,6 +15,8 @@ import java.util.Optional;
 @AllArgsConstructor
 public class SecurityService {
     private final PersonRepository personRepository;
+
+    private final PasswordEncoder passwordEncoder;
 
     public LoginResponse login(String email, String password) {
         Optional<Person> maybePerson = personRepository.findByEmail(email);
@@ -25,7 +28,7 @@ public class SecurityService {
             );
         }
         Person person = maybePerson.get();
-        if(person.getPassword().equals(password)) {
+        if (passwordEncoder.matches(password, person.getPassword())) {
             String role;
             if (person instanceof Student) {
                 role = "STUDENT";

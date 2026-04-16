@@ -6,6 +6,7 @@ import com.andrei.demo.model.Person;
 import com.andrei.demo.model.PersonCreateDTO;
 import com.andrei.demo.repository.PersonRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,7 +16,10 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class PersonService {
+
     private final PersonRepository personRepository;
+
+    private final PasswordEncoder passwordEncoder;
 
     public List<Person> getPeople() {
         return personRepository.findAll();
@@ -32,7 +36,7 @@ public class PersonService {
         person.setName(personDTO.getName());
         person.setAge(personDTO.getAge());
         person.setEmail(personDTO.getEmail());
-        person.setPassword(personDTO.getPassword());
+        person.setPassword(passwordEncoder.encode(personDTO.getPassword()));
 
         return personRepository.save(person);
     }
@@ -55,7 +59,6 @@ public class PersonService {
         existingPerson.setName(person.getName());
         existingPerson.setAge(person.getAge());
         existingPerson.setEmail(newEmail);
-        existingPerson.setPassword(person.getPassword());
 
         return personRepository.save(existingPerson);
     }
@@ -67,7 +70,6 @@ public class PersonService {
                             existingPerson.setName(person.getName());
                             existingPerson.setAge(person.getAge());
                             existingPerson.setEmail(person.getEmail());
-                            existingPerson.setPassword(person.getPassword());
                             return personRepository.save(existingPerson);
                         })
                         .orElseThrow(
@@ -96,10 +98,6 @@ public class PersonService {
                 throw new DuplicateEmailException("Email " + person.getEmail() + "already exists");
             }
             existingPerson.setEmail(person.getEmail());
-        }
-
-        if (person.getPassword() != null) {
-            existingPerson.setPassword(person.getPassword());
         }
 
         return personRepository.save(existingPerson);
