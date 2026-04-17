@@ -21,11 +21,9 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private int jwtExpirationMs;
 
-    private Key key;
-
     @PostConstruct
-    public void init() {
-        key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    public Key getKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
     public String generateToken(String email, String role) {
@@ -34,7 +32,7 @@ public class JwtService {
                 .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-                .signWith(key)
+                .signWith(getKey())
                 .compact();
     }
 
@@ -57,7 +55,7 @@ public class JwtService {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(key).build()
+                .setSigningKey(getKey()).build()
                 .parseClaimsJws(token)
                 .getBody();
     }
@@ -74,7 +72,7 @@ public class JwtService {
 
     public boolean validateJwtToken(String token) {
         try {
-            Jwts.parser().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parser().setSigningKey(getKey()).build().parseClaimsJws(token);
             return true;
         } catch (SecurityException e) {
             System.out.println("Invalid JWT signature: " + e.getMessage());
@@ -89,5 +87,4 @@ public class JwtService {
         }
         return false;
     }
-
 }
