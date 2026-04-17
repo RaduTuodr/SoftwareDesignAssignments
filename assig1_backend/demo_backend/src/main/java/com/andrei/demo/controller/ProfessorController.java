@@ -1,7 +1,7 @@
 package com.andrei.demo.controller;
 
-import com.andrei.demo.config.DuplicateEmailException;
-import com.andrei.demo.config.ValidationException;
+import com.andrei.demo.config.exceptions.DuplicateEmailException;
+import com.andrei.demo.config.exceptions.ValidationException;
 import com.andrei.demo.model.Professor;
 import com.andrei.demo.model.ProfessorCreateDTO;
 import com.andrei.demo.service.ProfessorService;

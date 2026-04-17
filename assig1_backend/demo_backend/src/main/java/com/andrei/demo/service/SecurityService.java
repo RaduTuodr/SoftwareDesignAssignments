@@ -18,11 +18,14 @@ public class SecurityService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final JwtService jwtService;
+
     public LoginResponse login(String email, String password) {
         Optional<Person> maybePerson = personRepository.findByEmail(email);
         if(maybePerson.isEmpty()) {
             return new LoginResponse(
                     false,
+                    null,
                     null,
                     "Person with email " + email + " not found"
             );
@@ -37,9 +40,9 @@ public class SecurityService {
             } else {
                 role = "VIEWER";
             }
-            return new LoginResponse(true, role, null);
+            return new LoginResponse(true, role, jwtService.generateToken(email, role), null);
         } else {
-            return new LoginResponse(false, null, "Incorrect password");
+            return new LoginResponse(false, null, null, "Incorrect password");
         }
     }
 }

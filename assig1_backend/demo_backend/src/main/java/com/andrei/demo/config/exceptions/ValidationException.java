@@ -1,4 +1,4 @@
-package com.andrei.demo.config;
+package com.andrei.demo.config.exceptions;
 
 public class ValidationException extends Exception {
     public ValidationException(String message) {
