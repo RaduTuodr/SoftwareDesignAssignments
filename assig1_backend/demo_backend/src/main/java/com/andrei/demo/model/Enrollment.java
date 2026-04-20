@@ -10,7 +10,7 @@ import java.util.UUID;
 @Data
 @Table(
         name = "enrollment",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"person_id", "course_id"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "course_id"})
 )
 public class Enrollment {
     @Id
@@ -22,8 +22,8 @@ public class Enrollment {
     private Course course;
 
     @ManyToOne
-    @JoinColumn(name = "person_id", nullable = false)
-    private Person person;
+    @JoinColumn(name = "student_id", nullable = false)
+    private Student student;
 
     @Column(name = "enrollment_date", nullable = false)
     private LocalDateTime enrollmentDate;

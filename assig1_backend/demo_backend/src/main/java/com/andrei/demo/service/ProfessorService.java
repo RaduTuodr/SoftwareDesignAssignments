@@ -47,6 +47,27 @@ public class ProfessorService {
         return professorRepository.save(professor);
     }
 
+    public List<Professor> addProfessors(List<ProfessorCreateDTO> professorDTOs) throws DuplicateEmailException {
+        for (ProfessorCreateDTO dto : professorDTOs) {
+            if (personRepository.existsByEmail(dto.getEmail())) {
+                throw new DuplicateEmailException("Email " + dto.getEmail() + " already exists");
+            }
+        }
+
+        List<Professor> professors = professorDTOs.stream().map(dto -> {
+            Professor professor = new Professor();
+            professor.setName(dto.getName());
+            professor.setPassword(dto.getPassword());
+            professor.setAge(dto.getAge());
+            professor.setEmail(dto.getEmail());
+            professor.setDepartment(dto.getDepartment());
+            professor.setAcademicRank(dto.getAcademicRank());
+            return professor;
+        }).toList();
+
+        return professorRepository.saveAll(professors);
+    }
+
     public Professor updateProfessor(UUID uuid, Professor professor) throws ValidationException, DuplicateEmailException {
         Professor existingProfessor = professorRepository.findById(uuid).orElseThrow(
                 () -> new ValidationException("Professor with id " + uuid + " not found"));

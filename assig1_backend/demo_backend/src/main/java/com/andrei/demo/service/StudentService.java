@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
@@ -22,14 +23,14 @@ public class StudentService {
         return studentRepository.findAll();
     }
 
-    public Student getStudentById(UUID uuid) throws ValidationException {
+    public Student getStudentById(UUID uuid) throws NoSuchElementException {
         return studentRepository.findById(uuid).orElseThrow(
-                () -> new ValidationException("Student with id " + uuid + " not found"));
+                () -> new NoSuchElementException("Student with id " + uuid + " not found"));
     }
 
-    public Student getStudentByEmail(String email) throws ValidationException {
+    public Student getStudentByEmail(String email) throws NoSuchElementException {
         return studentRepository.findByEmail(email).orElseThrow(
-                () -> new ValidationException("Student with email " + email + " not found"));
+                () -> new NoSuchElementException("Student with email " + email + " not found"));
     }
 
     public Student addStudent(StudentCreateDTO studentDTO) throws DuplicateEmailException {
@@ -38,6 +39,11 @@ public class StudentService {
             throw new DuplicateEmailException("Email " + studentDTO.getEmail() + " already exists");
         }
 
+        Student student = studentFromDTO(studentDTO);
+        return studentRepository.save(student);
+    }
+
+    private Student studentFromDTO(StudentCreateDTO studentDTO) {
         Student student = new Student();
         student.setName(studentDTO.getName());
         student.setPassword(studentDTO.getPassword());
@@ -45,7 +51,19 @@ public class StudentService {
         student.setEmail(studentDTO.getEmail());
         student.setRegistrationNumber(studentDTO.getRegistrationNumber());
         student.setGraduationYear(studentDTO.getGraduationYear());
-        return studentRepository.save(student);
+        return student;
+    }
+
+    public List<Student> addStudents(List<StudentCreateDTO> studentDTOs) throws DuplicateEmailException {
+        for (StudentCreateDTO dto : studentDTOs) {
+            if (personRepository.existsByEmail(dto.getEmail())) {
+                throw new DuplicateEmailException("Email " + dto.getEmail() + " already exists");
+            }
+        }
+
+        List<Student> students = studentDTOs.stream().map(this::studentFromDTO).toList();
+
+        return studentRepository.saveAll(students);
     }
 
     public Student updateStudent(UUID uuid, Student student) throws ValidationException, DuplicateEmailException {

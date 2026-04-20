@@ -40,7 +40,7 @@ public class CourseController {
     @IsAdmin
     @PostMapping()
     public Course createCourse(@Valid @RequestBody CourseCreateDTO courseCreateDTO) {
-        return service.createCourse(courseCreateDTO);
+        return service.addCourse(courseCreateDTO);
     }
 
     @IsAdmin

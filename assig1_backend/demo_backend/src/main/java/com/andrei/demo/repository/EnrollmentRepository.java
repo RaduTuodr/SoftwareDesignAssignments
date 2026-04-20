@@ -2,7 +2,7 @@ package com.andrei.demo.repository;
 
 import com.andrei.demo.model.Course;
 import com.andrei.demo.model.Enrollment;
-import com.andrei.demo.model.Person;
+import com.andrei.demo.model.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,5 +15,5 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, UUID> {
 
     List<Enrollment> getEnrollmentsByCourse(Course course);
 
-    List<Enrollment> getEnrollmentsByPerson(Person person);
+    List<Enrollment> getEnrollmentsByStudent(Student student);
 }

@@ -36,7 +36,12 @@ public class SecurityService {
             if (person instanceof Student) {
                 role = "STUDENT";
             } else if (person instanceof Professor) {
-                role = "PROFESSOR";
+                Professor prof = (Professor) person;
+                if ("Administration".equals(prof.getDepartment())) {
+                    role = "ADMIN";
+                } else {
+                    role = "PROFESSOR";
+                }
             } else {
                 role = "ADMIN";
             }

@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Alice Student",
+    "password": "password123",
+    "age": 20,
+    "email": "alice.student@example.com",
+    "registrationNumber": "12345",
+    "graduationYear": 2025
+  },
+  {
+    "name": "Bob Student",
+    "password": "password123",
+    "age": 21,
+    "email": "bob.student@example.com",
+    "registrationNumber": "12346",
+    "graduationYear": 2026
+  }
+]

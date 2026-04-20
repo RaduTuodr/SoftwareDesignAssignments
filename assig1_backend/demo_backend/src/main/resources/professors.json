@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Dr. Smith",
+    "password": "password123",
+    "age": 45,
+    "email": "smith.prof@example.com",
+    "department": "Computer Science",
+    "academicRank": "Associate Professor"
+  },
+  {
+    "name": "Dr. Johnson",
+    "password": "password123",
+    "age": 50,
+    "email": "johnson.prof@example.com",
+    "department": "Mathematics",
+    "academicRank": "Professor"
+  },
+  {
+    "name": "Admin Prof",
+    "password": "password123",
+    "age": 40,
+    "email": "admin.prof@example.com",
+    "department": "Administration",
+    "academicRank": "Dean"
+  }
+]

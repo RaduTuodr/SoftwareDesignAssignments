@@ -1,0 +1,14 @@
+[
+  {
+    "studentEmail": "alice.student@example.com",
+    "courseTitle": "Data Structures"
+  },
+  {
+    "studentEmail": "bob.student@example.com",
+    "courseTitle": "Calculus I"
+  },
+  {
+    "studentEmail": "alice.student@example.com",
+    "courseTitle": "Database Systems"
+  }
+]

@@ -8,8 +8,9 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "student")
 @EqualsAndHashCode(callSuper = true)
+@Table(name = "students")
+@DiscriminatorValue("STUDENT")
 public class Student extends Person {
     @Column(name = "registration_number", unique = true)
     private String registrationNumber;
@@ -17,6 +18,6 @@ public class Student extends Person {
     @Column(name = "graduation_year")
     private Integer graduationYear;
 
-    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Enrollment> enrollments;
 }

@@ -34,7 +34,7 @@ public class CourseService {
                 () -> new IllegalStateException("Courses with credits " + credits + " not found"));
     }
 
-    public Course createCourse(CourseCreateDTO courseCreateDTO) {
+    public Course addCourse(CourseCreateDTO courseCreateDTO) {
         Course course = new Course();
 
         course.setTitle(courseCreateDTO.getTitle());
@@ -42,6 +42,14 @@ public class CourseService {
         course.setCredits(courseCreateDTO.getCredits());
 
         return repository.save(course);
+    }
+
+    public void addCourses(List<CourseCreateDTO> courseCreateDTOs) {
+        repository.saveAll(
+                courseCreateDTOs.stream()
+                        .map(this::addCourse)
+                        .toList()
+        );
     }
 
     public Course updateCourse(UUID uuid, Course course) throws ValidationException {

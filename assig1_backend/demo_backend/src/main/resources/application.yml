@@ -2,7 +2,7 @@ spring:
   application:
     name: demo
   datasource:
-    url: jdbc:postgresql://localhost:5432/assig1
+    url: jdbc:postgresql://localhost:5432/assig
     username: postgres
     password: postgres
   sql:
@@ -13,7 +13,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: true
 server:
   port: 8080

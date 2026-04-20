@@ -25,6 +25,9 @@ public class Course {
     @Column(name = "credits", nullable = false)
     private Integer credits;
 
+    @Column(name = "department")
+    private Integer department;
+
     @JsonIgnore
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Enrollment> enrollments = new ArrayList<>();

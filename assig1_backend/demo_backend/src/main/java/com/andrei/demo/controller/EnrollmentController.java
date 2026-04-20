@@ -24,16 +24,16 @@ public class EnrollmentController {
     public List<Enrollment> getEnrollments() { return service.getEnrollments(); }
     
     @IsStudent
-    @GetMapping("/person/{personId}")
-    public List<Enrollment> getEnrollmentsByPersonId(@Valid @PathVariable UUID personId) { return service.getEnrollmentByPersonId(personId); }
-    
+    @GetMapping("/student/{studentId}")
+    public List<Enrollment> getEnrollmentsByStudentId(@Valid @PathVariable UUID studentId) { return service.getEnrollmentByStudentId(studentId); }
+
     @IsStudent
     @GetMapping("/course/{courseId}")
     public List<Enrollment> getEnrollmentsByCourseId(@Valid @PathVariable UUID courseId) { return service.getEnrollmentByCourseId(courseId); }
     
     @IsAdmin
-    @PostMapping("/person/{personId}/course/{courseId}")
-    public Enrollment enrollPersonToCourse(@Valid @PathVariable UUID personId, @Valid @PathVariable UUID courseId) {
-        return service.addEnrollment(personId, courseId);
+    @PostMapping("/student/{studentId}/course/{courseId}")
+    public Enrollment enrollStudentToCourse(@Valid @PathVariable UUID studentId, @Valid @PathVariable UUID courseId) {
+        return service.addEnrollment(studentId, courseId);
     }
 }

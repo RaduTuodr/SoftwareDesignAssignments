@@ -10,6 +10,8 @@ import java.util.UUID;
 @Data
 @Table(name = "person")
 @Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "person_type")
+@DiscriminatorValue("PERSON")
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -41,6 +41,25 @@ public class PersonService {
         return personRepository.save(person);
     }
 
+    public List<Person> addPeople(List<PersonCreateDTO> personDTOs) throws DuplicateEmailException {
+        for (PersonCreateDTO dto : personDTOs) {
+            if (personRepository.existsByEmail(dto.getEmail())) {
+                throw new DuplicateEmailException("Email " + dto.getEmail() + " already exists");
+            }
+        }
+
+        List<Person> people = personDTOs.stream().map(dto -> {
+            Person person = new Person();
+            person.setName(dto.getName());
+            person.setAge(dto.getAge());
+            person.setEmail(dto.getEmail());
+            person.setPassword(passwordEncoder.encode(dto.getPassword()));
+            return person;
+        }).toList();
+
+        return personRepository.saveAll(people);
+    }
+
     public Person updatePerson(UUID uuid, Person person) throws ValidationException {
         Optional<Person> personOptional =
                 personRepository.findById(uuid);

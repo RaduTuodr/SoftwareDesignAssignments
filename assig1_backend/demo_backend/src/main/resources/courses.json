@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Data Structures",
+    "description": "Introduction to Data Structures",
+    "credits": 3
+  },
+  {
+    "title": "Calculus I",
+    "description": "Introduction to Calculus",
+    "credits": 4
+  },
+  {
+    "title": "Database Systems",
+    "description": "Introduction to Databases",
+    "credits": 3
+  }
+]
