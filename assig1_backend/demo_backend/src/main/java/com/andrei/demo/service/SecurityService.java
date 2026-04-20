@@ -33,13 +33,12 @@ public class SecurityService {
         Person person = maybePerson.get();
         if (passwordEncoder.matches(password, person.getPassword())) {
             String role;
-            if (person.getEnrollments()) {
-            } else if (person instanceof Student) {
+            if (person instanceof Student) {
                 role = "STUDENT";
             } else if (person instanceof Professor) {
                 role = "PROFESSOR";
             } else {
-                role = "VISITOR";
+                role = "ADMIN";
             }
             return new LoginResponseDTO(true, role, jwtService.generateToken(email, role), null);
         } else {

@@ -2,6 +2,8 @@ package com.andrei.demo.controller;
 
 import com.andrei.demo.config.exceptions.DuplicateEmailException;
 import com.andrei.demo.config.exceptions.ValidationException;
+import com.andrei.demo.controller.annotations.IsAdmin;
+import com.andrei.demo.controller.annotations.IsStudent;
 import com.andrei.demo.model.Student;
 import com.andrei.demo.model.dto.StudentCreateDTO;
 import com.andrei.demo.service.StudentService;
@@ -19,32 +21,38 @@ import java.util.UUID;
 public class StudentController {
     private final StudentService studentService;
 
+    @IsStudent
     @GetMapping()
     public List<Student> getStudents() {
         return studentService.getStudents();
     }
 
+    @IsStudent
     @GetMapping("/{uuid}")
     public Student getStudentById(@PathVariable UUID uuid) throws ValidationException {
         return studentService.getStudentById(uuid);
     }
 
+    @IsStudent
     @GetMapping("/email/{email}")
     public Student getStudentByEmail(@PathVariable String email) throws ValidationException {
         return studentService.getStudentByEmail(email);
     }
 
+    @IsAdmin
     @PostMapping
     public Student addStudent(@Valid @RequestBody StudentCreateDTO studentDTO) throws DuplicateEmailException {
         return studentService.addStudent(studentDTO);
     }
 
+    @IsAdmin
     @PutMapping("/{uuid}")
     public Student updateStudent(@PathVariable UUID uuid, @RequestBody Student student)
             throws ValidationException {
         return studentService.updateStudent(uuid, student);
     }
 
+    @IsAdmin
     @DeleteMapping("/{uuid}")
     public void deleteStudent(@PathVariable UUID uuid) {
         studentService.deleteStudent(uuid);

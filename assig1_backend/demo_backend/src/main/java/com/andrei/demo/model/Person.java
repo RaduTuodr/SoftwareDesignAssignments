@@ -1,12 +1,9 @@
 package com.andrei.demo.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -29,8 +26,4 @@ public class Person {
     @Email
     @Column(name = "email", nullable = false, unique = true)
     private String email;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Enrollment> enrollments = new ArrayList<>();
 }
