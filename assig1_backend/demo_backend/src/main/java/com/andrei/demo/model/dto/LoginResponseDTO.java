@@ -1,6 +1,6 @@
-package com.andrei.demo.model;
+package com.andrei.demo.model.dto;
 
-public record LoginResponse(
+public record LoginResponseDTO(
         Boolean success,
         String role,
         String token,

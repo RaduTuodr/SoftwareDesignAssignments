@@ -1,6 +1,6 @@
 package com.andrei.demo.service;
 
-import com.andrei.demo.model.LoginResponse;
+import com.andrei.demo.model.dto.LoginResponseDTO;
 import com.andrei.demo.model.Person;
 import com.andrei.demo.model.Professor;
 import com.andrei.demo.model.Student;
@@ -20,10 +20,10 @@ public class SecurityService {
 
     private final JwtService jwtService;
 
-    public LoginResponse login(String email, String password) {
+    public LoginResponseDTO login(String email, String password) {
         Optional<Person> maybePerson = personRepository.findByEmail(email);
         if(maybePerson.isEmpty()) {
-            return new LoginResponse(
+            return new LoginResponseDTO(
                     false,
                     null,
                     null,
@@ -40,9 +40,9 @@ public class SecurityService {
             } else {
                 role = "VIEWER";
             }
-            return new LoginResponse(true, role, jwtService.generateToken(email, role), null);
+            return new LoginResponseDTO(true, role, jwtService.generateToken(email, role), null);
         } else {
-            return new LoginResponse(false, null, null, "Incorrect password");
+            return new LoginResponseDTO(false, null, null, "Incorrect password");
         }
     }
 }
