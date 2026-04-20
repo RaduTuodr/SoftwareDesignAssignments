@@ -1,10 +1,10 @@
 package com.andrei.demo.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.List;
 
 @Entity
 @Data
@@ -16,4 +16,7 @@ public class Student extends Person {
 
     @Column(name = "graduation_year")
     private Integer graduationYear;
+
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Enrollment> enrollments;
 }
