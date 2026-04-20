@@ -2,7 +2,7 @@ package com.andrei.demo.controller.unit;
 
 import com.andrei.demo.controller.PersonController;
 import com.andrei.demo.model.Person;
-import com.andrei.demo.model.PersonCreateDTO;
+import com.andrei.demo.model.dto.PersonCreateDTO;
 import com.andrei.demo.service.PersonService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

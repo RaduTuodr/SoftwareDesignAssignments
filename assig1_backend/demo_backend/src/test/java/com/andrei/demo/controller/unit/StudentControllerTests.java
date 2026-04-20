@@ -2,7 +2,7 @@ package com.andrei.demo.controller.unit;
 
 import com.andrei.demo.controller.StudentController;
 import com.andrei.demo.model.Student;
-import com.andrei.demo.model.StudentCreateDTO;
+import com.andrei.demo.model.dto.StudentCreateDTO;
 import com.andrei.demo.service.StudentService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,13 +32,13 @@ class StudentControllerTests {
 
         when(service.getStudents()).thenReturn(List.of(student));
         when(service.getStudentById(id)).thenReturn(student);
-        when(service.getStudentByEmail("a@b.com")).thenReturn(student);
+        when(service.getStudentByEmail("radu@tudor.com")).thenReturn(student);
         when(service.addStudent(dto)).thenReturn(student);
         when(service.updateStudent(id, student)).thenReturn(student);
 
         assertEquals(1, controller.getStudents().size());
         assertEquals(student, controller.getStudentById(id));
-        assertEquals(student, controller.getStudentByEmail("a@b.com"));
+        assertEquals(student, controller.getStudentByEmail("radu@tudor.com"));
         assertEquals(student, controller.addStudent(dto));
         assertEquals(student, controller.updateStudent(id, student));
         controller.deleteStudent(id);

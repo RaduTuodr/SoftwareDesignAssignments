@@ -1,4 +1,4 @@
-package com.andrei.demo.model;
+package com.andrei.demo.model.dto;
 
 import com.andrei.demo.validator.StandardCredits;
 import jakarta.validation.constraints.NotBlank;

@@ -3,7 +3,7 @@ package com.andrei.demo.service;
 import com.andrei.demo.config.exceptions.DuplicateEmailException;
 import com.andrei.demo.config.exceptions.ValidationException;
 import com.andrei.demo.model.Person;
-import com.andrei.demo.model.PersonCreateDTO;
+import com.andrei.demo.model.dto.PersonCreateDTO;
 import com.andrei.demo.repository.PersonRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -2,7 +2,7 @@ package com.andrei.demo.controller;
 
 import com.andrei.demo.config.exceptions.ValidationException;
 import com.andrei.demo.model.Course;
-import com.andrei.demo.model.CourseCreateDTO;
+import com.andrei.demo.model.dto.CourseCreateDTO;
 import com.andrei.demo.service.CourseService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

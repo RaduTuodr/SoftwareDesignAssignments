@@ -3,7 +3,7 @@ package com.andrei.demo.service;
 import com.andrei.demo.config.exceptions.DuplicateEmailException;
 import com.andrei.demo.config.exceptions.ValidationException;
 import com.andrei.demo.model.Student;
-import com.andrei.demo.model.StudentCreateDTO;
+import com.andrei.demo.model.dto.StudentCreateDTO;
 import com.andrei.demo.repository.PersonRepository;
 import com.andrei.demo.repository.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;

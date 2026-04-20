@@ -2,7 +2,7 @@ package com.andrei.demo.service;
 
 import com.andrei.demo.config.exceptions.ValidationException;
 import com.andrei.demo.model.Course;
-import com.andrei.demo.model.CourseCreateDTO;
+import com.andrei.demo.model.dto.CourseCreateDTO;
 import com.andrei.demo.repository.CourseRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
