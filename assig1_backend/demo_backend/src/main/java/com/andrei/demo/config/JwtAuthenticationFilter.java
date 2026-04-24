@@ -1,6 +1,7 @@
 package com.andrei.demo.config;
 
 import com.andrei.demo.service.JwtService;
+import com.andrei.demo.model.enums.RoleName;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String email;
-        final String role;
+        final RoleName role;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -41,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (jwtService.validateToken(jwt, email)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        email, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+                        email, null, List.of(new SimpleGrantedAuthority("ROLE_" + role.name())));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }

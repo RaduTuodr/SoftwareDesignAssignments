@@ -1,10 +1,10 @@
 package com.andrei.demo.controller;
 
 import com.andrei.demo.model.Course;
-import com.andrei.demo.model.Person;
+import com.andrei.demo.model.Student;
 import com.andrei.demo.repository.CourseRepository;
 import com.andrei.demo.repository.EnrollmentRepository;
-import com.andrei.demo.repository.PersonRepository;
+import com.andrei.demo.repository.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +13,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -30,12 +31,12 @@ class EnrollmentControllerIntegrationTests {
     private EnrollmentRepository enrollmentRepository;
 
     @Autowired
-    private PersonRepository personRepository;
+    private StudentRepository studentRepository;
 
     @Autowired
     private CourseRepository courseRepository;
 
-    private Person person;
+    private Student student;
     private Course course;
 
     @BeforeEach
@@ -43,14 +44,16 @@ class EnrollmentControllerIntegrationTests {
         enrollmentRepository.deleteAll();
         enrollmentRepository.flush();
         courseRepository.deleteAll();
-        personRepository.deleteAll();
+        studentRepository.deleteAll();
 
-        person = new Person();
-        person.setName("Enroll User");
-        person.setPassword("Strong123!");
-        person.setAge(20);
-        person.setEmail("enroll.user@example.com");
-        person = personRepository.save(person);
+        student = new Student();
+        student.setName("Enroll Student");
+        student.setPassword("Strong123!");
+        student.setAge(20);
+        student.setEmail("enroll.student@example.com");
+        student.setRegistrationNumber("REG-300");
+        student.setGraduationYear(2027);
+        student = studentRepository.save(student);
 
         course = new Course();
         course.setTitle("Distributed Systems");
@@ -60,26 +63,36 @@ class EnrollmentControllerIntegrationTests {
     }
 
     @Test
-    void enrollPersonToCourseAndQueryByFilters() throws Exception {
-        mockMvc.perform(post("/enroll/person/{personId}/course/{courseId}", person.getId(), course.getId()))
+    void enrollStudentToCourseAndQueryByFilters() throws Exception {
+        mockMvc.perform(post("/enroll/student/{studentId}/course/{courseId}", student.getId(), course.getId())
+                        .with(user("admin@example.com").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.person.id").value(person.getId().toString()))
+                .andExpect(jsonPath("$.student.id").value(student.getId().toString()))
                 .andExpect(jsonPath("$.course.id").value(course.getId().toString()))
                 .andExpect(jsonPath("$.enrollmentDate").exists());
 
-        mockMvc.perform(get("/enroll"))
+        mockMvc.perform(get("/enroll").with(user("student@example.com").roles("STUDENT")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
 
-        mockMvc.perform(get("/enroll/person/{personId}", person.getId()))
+        mockMvc.perform(get("/enroll/student/{studentId}", student.getId())
+                        .with(user("prof@example.com").roles("PROFESSOR")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].person.email").value("enroll.user@example.com"));
+                .andExpect(jsonPath("$[0].student.email").value("enroll.student@example.com"));
 
-        mockMvc.perform(get("/enroll/course/{courseId}", course.getId()))
+        mockMvc.perform(get("/enroll/course/{courseId}", course.getId())
+                        .with(user("admin@example.com").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].course.title").value("Distributed Systems"));
+    }
+
+    @Test
+    void enrollEndpointRejectsStudentRole() throws Exception {
+        mockMvc.perform(post("/enroll/student/{studentId}/course/{courseId}", student.getId(), course.getId())
+                        .with(user("student@example.com").roles("STUDENT")))
+                .andExpect(status().isForbidden());
     }
 }

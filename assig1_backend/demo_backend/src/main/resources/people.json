@@ -1,13 +1,13 @@
 [
   {
     "name": "John Doe",
-    "password": "password123",
+    "password": "password123S#",
     "age": 30,
     "email": "john.doe@example.com"
   },
   {
     "name": "Jane Admin",
-    "password": "password123",
+    "password": "password123S#",
     "age": 35,
     "email": "jane.admin@example.com"
   }

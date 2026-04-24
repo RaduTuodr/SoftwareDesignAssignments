@@ -7,6 +7,7 @@ import com.andrei.demo.model.dto.StudentCreateDTO;
 import com.andrei.demo.repository.PersonRepository;
 import com.andrei.demo.repository.StudentRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.UUID;
 public class StudentService {
     private final StudentRepository studentRepository;
     private final PersonRepository personRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public List<Student> getStudents() {
         return studentRepository.findAll();
@@ -61,7 +63,17 @@ public class StudentService {
             }
         }
 
-        List<Student> students = studentDTOs.stream().map(this::studentFromDTO).toList();
+        List<Student> students = studentDTOs.stream().map(dto -> {
+            Student student = new Student();
+            student.setName(dto.getName());
+            student.setPassword(passwordEncoder.encode(dto.getPassword()));
+            student.setAge(dto.getAge());
+            student.setEmail(dto.getEmail());
+            student.setRegistrationNumber(dto.getRegistrationNumber());
+            student.setGraduationYear(dto.getGraduationYear());
+            return student;
+         }
+        ).toList();
 
         return studentRepository.saveAll(students);
     }

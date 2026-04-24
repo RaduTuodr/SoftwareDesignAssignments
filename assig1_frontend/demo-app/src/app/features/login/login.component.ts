@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Router } from '@angular/router';
 import { LoginStore } from './login.store';
@@ -16,6 +17,7 @@ import { LoginStore } from './login.store';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -34,6 +36,12 @@ export class LoginComponent {
     email: ['', [Validators.required]],
     password: ['', [Validators.required]],
   });
+
+  protected readonly isPasswordVisible = signal(false);
+
+  protected togglePasswordVisibility(): void {
+    this.isPasswordVisible.update(visible => !visible);
+  }
 
   protected submit(): void {
     if (this.loginForm.invalid || this.isSubmitting()) {

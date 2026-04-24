@@ -7,6 +7,7 @@ import com.andrei.demo.model.dto.ProfessorCreateDTO;
 import com.andrei.demo.repository.PersonRepository;
 import com.andrei.demo.repository.ProfessorRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class ProfessorService {
     private final ProfessorRepository professorRepository;
     private final PersonRepository personRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public List<Professor> getProfessors() {
         return professorRepository.findAll();
@@ -39,7 +41,7 @@ public class ProfessorService {
 
         Professor professor = new Professor();
         professor.setName(professorDTO.getName());
-        professor.setPassword(professorDTO.getPassword());
+        professor.setPassword(passwordEncoder.encode(professorDTO.getPassword()));
         professor.setAge(professorDTO.getAge());
         professor.setEmail(professorDTO.getEmail());
         professor.setDepartment(professorDTO.getDepartment());
@@ -57,7 +59,7 @@ public class ProfessorService {
         List<Professor> professors = professorDTOs.stream().map(dto -> {
             Professor professor = new Professor();
             professor.setName(dto.getName());
-            professor.setPassword(dto.getPassword());
+            professor.setPassword(passwordEncoder.encode(dto.getPassword()));
             professor.setAge(dto.getAge());
             professor.setEmail(dto.getEmail());
             professor.setDepartment(dto.getDepartment());
@@ -79,7 +81,7 @@ public class ProfessorService {
         }
 
         existingProfessor.setName(professor.getName());
-        existingProfessor.setPassword(professor.getPassword());
+        professor.setPassword(passwordEncoder.encode(professor.getPassword()));
         existingProfessor.setAge(professor.getAge());
         existingProfessor.setEmail(professor.getEmail());
         existingProfessor.setDepartment(professor.getDepartment());

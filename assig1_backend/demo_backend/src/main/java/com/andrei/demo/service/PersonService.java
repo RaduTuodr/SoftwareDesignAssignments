@@ -41,7 +41,7 @@ public class PersonService {
         return personRepository.save(person);
     }
 
-    public List<Person> addPeople(List<PersonCreateDTO> personDTOs) throws DuplicateEmailException {
+    public void addPeople(List<PersonCreateDTO> personDTOs) throws DuplicateEmailException {
         for (PersonCreateDTO dto : personDTOs) {
             if (personRepository.existsByEmail(dto.getEmail())) {
                 throw new DuplicateEmailException("Email " + dto.getEmail() + " already exists");
@@ -57,7 +57,7 @@ public class PersonService {
             return person;
         }).toList();
 
-        return personRepository.saveAll(people);
+        personRepository.saveAll(people);
     }
 
     public Person updatePerson(UUID uuid, Person person) throws ValidationException {

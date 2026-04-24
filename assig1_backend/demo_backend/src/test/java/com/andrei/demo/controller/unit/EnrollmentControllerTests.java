@@ -24,18 +24,18 @@ class EnrollmentControllerTests {
 
     @Test
     void allMethodsDelegate() {
-        UUID personId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
         UUID courseId = UUID.randomUUID();
         Enrollment enrollment = new Enrollment();
 
         when(service.getEnrollments()).thenReturn(List.of(enrollment));
-        when(service.getEnrollmentByPersonId(personId)).thenReturn(List.of(enrollment));
+        when(service.getEnrollmentByStudentId(studentId)).thenReturn(List.of(enrollment));
         when(service.getEnrollmentByCourseId(courseId)).thenReturn(List.of(enrollment));
-        when(service.addEnrollment(personId, courseId)).thenReturn(enrollment);
+        when(service.addEnrollment(studentId, courseId)).thenReturn(enrollment);
 
         assertEquals(1, controller.getEnrollments().size());
-        assertEquals(1, controller.getEnrollmentsByPersonId(personId).size());
+        assertEquals(1, controller.getEnrollmentsByStudentId(studentId).size());
         assertEquals(1, controller.getEnrollmentsByCourseId(courseId).size());
-        assertEquals(enrollment, controller.enrollPersonToCourse(personId, courseId));
+        assertEquals(enrollment, controller.enrollStudentToCourse(studentId, courseId));
     }
 }

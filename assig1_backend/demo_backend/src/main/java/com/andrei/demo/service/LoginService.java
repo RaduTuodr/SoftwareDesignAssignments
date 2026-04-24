@@ -4,16 +4,18 @@ import com.andrei.demo.model.dto.LoginResponseDTO;
 import com.andrei.demo.model.Person;
 import com.andrei.demo.model.Professor;
 import com.andrei.demo.model.Student;
+import com.andrei.demo.model.enums.RoleName;
 import com.andrei.demo.repository.PersonRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class SecurityService {
+public class LoginService {
     private final PersonRepository personRepository;
 
     private final PasswordEncoder passwordEncoder;
@@ -27,27 +29,28 @@ public class SecurityService {
                     false,
                     null,
                     null,
+                    null,
                     "Person with email " + email + " not found"
             );
         }
         Person person = maybePerson.get();
         if (passwordEncoder.matches(password, person.getPassword())) {
-            String role;
+            RoleName role;
             if (person instanceof Student) {
-                role = "STUDENT";
+                role = RoleName.STUDENT;
             } else if (person instanceof Professor) {
                 Professor prof = (Professor) person;
                 if ("Administration".equals(prof.getDepartment())) {
-                    role = "ADMIN";
+                    role = RoleName.ADMIN;
                 } else {
-                    role = "PROFESSOR";
+                    role = RoleName.PROFESSOR;
                 }
             } else {
-                role = "ADMIN";
+                role = RoleName.ADMIN;
             }
-            return new LoginResponseDTO(true, role, jwtService.generateToken(email, role), null);
+            return new LoginResponseDTO(true, role.name(), jwtService.generateToken(email, role), (int) (System.currentTimeMillis() / 1000 + 60 * 60), null);
         } else {
-            return new LoginResponseDTO(false, null, null, "Incorrect password");
+            return new LoginResponseDTO(false, null, null, null, "Incorrect password");
         }
     }
 }

@@ -1,7 +1,7 @@
 [
   {
     "name": "Dr. Smith",
-    "password": "password123",
+    "password": "password123S#",
     "age": 45,
     "email": "smith.prof@example.com",
     "department": "Computer Science",
@@ -9,7 +9,7 @@
   },
   {
     "name": "Dr. Johnson",
-    "password": "password123",
+    "password": "password123S#",
     "age": 50,
     "email": "johnson.prof@example.com",
     "department": "Mathematics",
@@ -17,7 +17,7 @@
   },
   {
     "name": "Admin Prof",
-    "password": "password123",
+    "password": "password123S#",
     "age": 40,
     "email": "admin.prof@example.com",
     "department": "Administration",

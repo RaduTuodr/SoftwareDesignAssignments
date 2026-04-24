@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,7 +54,7 @@ public class PersonControllerIntegrationTests {
 
     @Test
     void testGetPeople() throws Exception {
-        mockMvc.perform(get("/person"))
+        mockMvc.perform(get("/person").with(user("student@example.com").roles("STUDENT")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()")
                         .value(2))
@@ -72,6 +73,7 @@ public class PersonControllerIntegrationTests {
         String validPersonJson = loadFixture("valid_person.json");
 
         mockMvc.perform(post("/person")
+                        .with(user("admin@example.com").roles("ADMIN"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validPersonJson))
                 .andExpect(status().isOk())
@@ -87,6 +89,7 @@ public class PersonControllerIntegrationTests {
         String invalidPersonJson = loadFixture("invalid_person.json");
         System.out.println(invalidPersonJson);
         mockMvc.perform(post("/person")
+                        .with(user("admin@example.com").roles("ADMIN"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidPersonJson))
                 .andExpect(status().isBadRequest())
@@ -98,6 +101,23 @@ public class PersonControllerIntegrationTests {
                         .value("Age is required"))
                 .andExpect(jsonPath("$.email")
                         .value("Email is required"));
+    }
+
+    @Test
+    void testGetPeopleRequiresAuthentication() throws Exception {
+        mockMvc.perform(get("/person"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testAddPersonRejectsNonAdmin() throws Exception {
+        String validPersonJson = loadFixture("valid_person.json");
+
+        mockMvc.perform(post("/person")
+                        .with(user("student@example.com").roles("STUDENT"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(validPersonJson))
+                .andExpect(status().isForbidden());
     }
 
 

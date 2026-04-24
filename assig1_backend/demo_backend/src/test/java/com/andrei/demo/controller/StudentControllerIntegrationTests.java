@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,7 +49,7 @@ class StudentControllerIntegrationTests {
 
     @Test
     void getStudentsReturnsSeededData() throws Exception {
-        mockMvc.perform(get("/student"))
+        mockMvc.perform(get("/student").with(user("student.one@example.com").roles("STUDENT")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].email").value("student.one@example.com"));
@@ -68,6 +69,7 @@ class StudentControllerIntegrationTests {
                 """;
 
         mockMvc.perform(post("/student")
+                        .with(user("admin@example.com").roles("ADMIN"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isOk())
@@ -87,6 +89,7 @@ class StudentControllerIntegrationTests {
                 """;
 
         mockMvc.perform(post("/student")
+                        .with(user("admin@example.com").roles("ADMIN"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isBadRequest())
@@ -111,13 +114,34 @@ class StudentControllerIntegrationTests {
                 """;
 
         mockMvc.perform(put("/student/{id}", id)
+                        .with(user("admin@example.com").roles("ADMIN"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Updated Name"));
 
-        mockMvc.perform(get("/student/{id}", id))
+        mockMvc.perform(get("/student/{id}", id).with(user("prof@example.com").roles("PROFESSOR")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("student.updated@example.com"));
+    }
+
+    @Test
+    void addStudentRejectsStudentRole() throws Exception {
+        String payload = """
+                {
+                  "name": "Student Two",
+                  "password": "Strong456!",
+                  "age": 22,
+                  "email": "student.two@example.com",
+                  "registrationNumber": "REG-101",
+                  "graduationYear": 2028
+                }
+                """;
+
+        mockMvc.perform(post("/student")
+                        .with(user("student.one@example.com").roles("STUDENT"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isForbidden());
     }
 }

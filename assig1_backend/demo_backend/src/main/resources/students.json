@@ -1,7 +1,7 @@
 [
   {
     "name": "Alice Student",
-    "password": "password123",
+    "password": "password123S#",
     "age": 20,
     "email": "alice.student@example.com",
     "registrationNumber": "12345",
@@ -9,7 +9,7 @@
   },
   {
     "name": "Bob Student",
-    "password": "password123",
+    "password": "password123S#",
     "age": 21,
     "email": "bob.student@example.com",
     "registrationNumber": "12346",

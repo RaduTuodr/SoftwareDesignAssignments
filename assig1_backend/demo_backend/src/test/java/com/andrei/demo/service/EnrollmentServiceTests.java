@@ -2,7 +2,7 @@ package com.andrei.demo.service;
 
 import com.andrei.demo.model.Course;
 import com.andrei.demo.model.Enrollment;
-import com.andrei.demo.model.Person;
+import com.andrei.demo.model.Student;
 import com.andrei.demo.repository.EnrollmentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,15 +13,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class EnrollmentServiceTests {
     @Mock
     private EnrollmentRepository repository;
     @Mock
-    private PersonService personService;
+    private StudentService studentService;
     @Mock
     private CourseService courseService;
     @InjectMocks
@@ -36,9 +39,9 @@ class EnrollmentServiceTests {
     @Test
     void getEnrollmentByIdDelegates() {
         UUID id = UUID.randomUUID();
-        Enrollment e = new Enrollment();
-        when(repository.getEnrollmentById(id)).thenReturn(e);
-        assertEquals(e, service.getEnrollmentById(id));
+        Enrollment enrollment = new Enrollment();
+        when(repository.getEnrollmentById(id)).thenReturn(enrollment);
+        assertEquals(enrollment, service.getEnrollmentById(id));
     }
 
     @Test
@@ -52,38 +55,38 @@ class EnrollmentServiceTests {
     }
 
     @Test
-    void getEnrollmentByPersonIdUsesPersonLookup() {
-        UUID personId = UUID.randomUUID();
-        Person person = new Person();
-        when(personService.getPersonById(personId)).thenReturn(person);
-        when(repository.getEnrollmentsByPerson(person)).thenReturn(List.of(new Enrollment()));
+    void getEnrollmentByStudentIdUsesStudentLookup() {
+        UUID studentId = UUID.randomUUID();
+        Student student = new Student();
+        when(studentService.getStudentById(studentId)).thenReturn(student);
+        when(repository.getEnrollmentsByStudent(student)).thenReturn(List.of(new Enrollment()));
 
-        assertEquals(1, service.getEnrollmentByPersonId(personId).size());
+        assertEquals(1, service.getEnrollmentByStudentId(studentId).size());
     }
 
     @Test
     void addEnrollmentBuildsAndSaves() {
-        UUID personId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
         UUID courseId = UUID.randomUUID();
-        Person person = new Person();
+        Student student = new Student();
         Course course = new Course();
 
-        when(personService.getPersonById(personId)).thenReturn(person);
+        when(studentService.getStudentById(studentId)).thenReturn(student);
         when(courseService.getCourseById(courseId)).thenReturn(course);
-        when(repository.save(any(Enrollment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(repository.save(any(Enrollment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Enrollment result = service.addEnrollment(personId, courseId);
+        Enrollment result = service.addEnrollment(studentId, courseId);
 
-        assertEquals(person, result.getPerson());
+        assertEquals(student, result.getStudent());
         assertEquals(course, result.getCourse());
         assertNotNull(result.getEnrollmentDate());
     }
 
     @Test
     void updateEnrollmentDelegates() {
-        Enrollment e = new Enrollment();
-        when(repository.save(e)).thenReturn(e);
-        assertEquals(e, service.updateEnrollment(e));
+        Enrollment enrollment = new Enrollment();
+        when(repository.save(enrollment)).thenReturn(enrollment);
+        assertEquals(enrollment, service.updateEnrollment(enrollment));
     }
 
     @Test

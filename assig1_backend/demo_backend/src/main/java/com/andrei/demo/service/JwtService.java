@@ -3,6 +3,7 @@ package com.andrei.demo.service;
 import com.andrei.demo.config.exceptions.ExpiredJwtException;
 import com.andrei.demo.config.exceptions.MalformedJwtException;
 import com.andrei.demo.config.exceptions.UnsupportedJwtException;
+import com.andrei.demo.model.enums.RoleName;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,10 +27,10 @@ public class JwtService {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    public String generateToken(String email, String role) {
+    public String generateToken(String email, RoleName role) {
         return Jwts.builder()
                 .setSubject(email)
-                .claim("role", role)
+                .claim("role", role.name())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(getKey())
@@ -40,8 +41,8 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public String getRoleFromToken(String token) {
-        return extractClaim(token, claims -> claims.get("role", String.class));
+    public RoleName getRoleFromToken(String token) {
+        return extractClaim(token, claims -> RoleName.valueOf(claims.get("role", String.class)));
     }
 
     public Date getExpirationDateFromToken(String token) {
