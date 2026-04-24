@@ -1,5 +1,6 @@
 package com.andrei.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -23,6 +24,7 @@ public class Enrollment {
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
+    @JsonIgnore
     private Student student;
 
     @Column(name = "enrollment_date", nullable = false)
