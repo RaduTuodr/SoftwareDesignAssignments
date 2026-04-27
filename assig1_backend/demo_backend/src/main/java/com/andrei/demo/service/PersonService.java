@@ -38,7 +38,9 @@ public class PersonService {
         person.setEmail(personDTO.getEmail());
         person.setPassword(passwordEncoder.encode(personDTO.getPassword()));
 
-        return personRepository.save(person);
+        Person savedPerson = personRepository.save(person);
+        System.out.println("Saved person: " + savedPerson);
+        return savedPerson;
     }
 
     public void addPeople(List<PersonCreateDTO> personDTOs) throws DuplicateEmailException {

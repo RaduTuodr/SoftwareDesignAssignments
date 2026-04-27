@@ -58,7 +58,7 @@ public class LoginService {
 
     public RegisterResponseDTO register(RegisterRequestDTO registerRequestDTO) {
         Optional<Person> maybePerson = personRepository.findByEmail(registerRequestDTO.email());
-        if(maybePerson.isEmpty()) {
+        if(maybePerson.isPresent()) {
             return new RegisterResponseDTO(
                     false,
                     "Person with email " + registerRequestDTO.email() + " already exists!");
@@ -66,11 +66,12 @@ public class LoginService {
 
         PersonCreateDTO personCreateDTO = new PersonCreateDTO(
                 registerRequestDTO.name(),
-                registerRequestDTO.email(),
+                registerRequestDTO.password(),
                 registerRequestDTO.age(),
-                registerRequestDTO.password()
+                registerRequestDTO.email()
         );
         try {
+            System.out.println("Before saving " + personCreateDTO);
             personService.addPerson(personCreateDTO);
             return new RegisterResponseDTO(
                     true,

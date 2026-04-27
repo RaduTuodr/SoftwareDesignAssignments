@@ -7,16 +7,15 @@ import com.andrei.demo.model.dto.RegisterResponseDTO;
 import com.andrei.demo.service.LoginService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RestController
 @AllArgsConstructor
 @CrossOrigin
+@RequestMapping("/api/auth")
 public class LoginController {
     private final LoginService loginService;
 
@@ -32,11 +31,13 @@ public class LoginController {
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponseDTO> register(@RequestBody RegisterRequestDTO registerRequestDTO) {
+        System.out.println("Arrived here.");
         RegisterResponseDTO registerResponseDTO = loginService.register(registerRequestDTO);
+        System.out.println(registerResponseDTO);
         if(registerResponseDTO.success()) {
             return ResponseEntity.ok(registerResponseDTO);
         } else {
-            return ResponseEntity.status(UNAUTHORIZED).body(registerResponseDTO);
+            return ResponseEntity.status(BAD_REQUEST).body(registerResponseDTO);
         }
-    }}
+    }
 }
