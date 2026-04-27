@@ -1,6 +1,7 @@
 package com.andrei.demo.service;
 
-import com.andrei.demo.model.dto.LoginResponseDTO;
+import com.andrei.demo.config.exceptions.DuplicateEmailException;
+import com.andrei.demo.model.dto.*;
 import com.andrei.demo.model.Person;
 import com.andrei.demo.model.Professor;
 import com.andrei.demo.model.Student;
@@ -21,20 +22,21 @@ public class LoginService {
     private final PasswordEncoder passwordEncoder;
 
     private final JwtService jwtService;
+    private final PersonService personService;
 
-    public LoginResponseDTO login(String email, String password) {
-        Optional<Person> maybePerson = personRepository.findByEmail(email);
+    public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
+        Optional<Person> maybePerson = personRepository.findByEmail(loginRequestDTO.email());
         if(maybePerson.isEmpty()) {
             return new LoginResponseDTO(
                     false,
                     null,
                     null,
                     null,
-                    "Person with email " + email + " not found"
+                    "Person with email " + loginRequestDTO.email() + " not found"
             );
         }
         Person person = maybePerson.get();
-        if (passwordEncoder.matches(password, person.getPassword())) {
+        if (passwordEncoder.matches(loginRequestDTO.password(), person.getPassword())) {
             RoleName role;
             if (person instanceof Student) {
                 role = RoleName.STUDENT;
@@ -48,9 +50,37 @@ public class LoginService {
             } else {
                 role = RoleName.ADMIN;
             }
-            return new LoginResponseDTO(true, role.name(), jwtService.generateToken(email, role), (int) (System.currentTimeMillis() / 1000 + 60 * 60), null);
+            return new LoginResponseDTO(true, role.name(), jwtService.generateToken(loginRequestDTO.email(), role), (int) (System.currentTimeMillis() / 1000 + 60 * 60), null);
         } else {
             return new LoginResponseDTO(false, null, null, null, "Incorrect password");
+        }
+    }
+
+    public RegisterResponseDTO register(RegisterRequestDTO registerRequestDTO) {
+        Optional<Person> maybePerson = personRepository.findByEmail(registerRequestDTO.email());
+        if(maybePerson.isEmpty()) {
+            return new RegisterResponseDTO(
+                    false,
+                    "Person with email " + registerRequestDTO.email() + " already exists!");
+        }
+
+        PersonCreateDTO personCreateDTO = new PersonCreateDTO(
+                registerRequestDTO.name(),
+                registerRequestDTO.email(),
+                registerRequestDTO.age(),
+                registerRequestDTO.password()
+        );
+        try {
+            personService.addPerson(personCreateDTO);
+            return new RegisterResponseDTO(
+                    true,
+                    "Person with email " + registerRequestDTO.email() + " successfully registered!"
+            );
+        } catch (DuplicateEmailException e) {
+            return new RegisterResponseDTO(
+                    false,
+                    "Person with email " + registerRequestDTO.email() + " already exists!"
+            );
         }
     }
 }
