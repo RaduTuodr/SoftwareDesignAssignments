@@ -4,7 +4,11 @@ import com.andrei.demo.config.exceptions.DuplicateEmailException;
 import com.andrei.demo.config.exceptions.ValidationException;
 import com.andrei.demo.controller.annotations.IsAdmin;
 import com.andrei.demo.controller.annotations.IsStudent;
+import com.andrei.demo.controller.annotations.IsVisitor;
+import com.andrei.demo.model.dto.PasswordChangeConfirmedDTO;
+import com.andrei.demo.model.dto.PasswordChangeRequestDTO;
 import com.andrei.demo.model.dto.PersonCreateDTO;
+import com.andrei.demo.service.PasswordResetService;
 import com.andrei.demo.service.PersonService;
 import com.andrei.demo.model.Person;
 import jakarta.validation.Valid;
@@ -21,6 +25,8 @@ import java.util.UUID;
 @RequestMapping("/person")
 public class PersonController {
     private final PersonService personService;
+
+    private final PasswordResetService passwordResetService;
 
     @IsStudent
     @GetMapping()
@@ -49,6 +55,14 @@ public class PersonController {
     @IsStudent
     @PutMapping("/{uuid}")
     public Person updatePerson(@PathVariable UUID uuid, @Valid @RequestBody Person person) throws ValidationException { return personService.updatePerson(uuid, person); }
+
+    @IsVisitor
+    @PutMapping("/{uuid}/password/request")
+    public void handlePasswordChangeRequest(@PathVariable UUID uuid, @Valid @RequestBody PasswordChangeRequestDTO passwordChangeRequestDTO) throws ValidationException { passwordResetService.handlePasswordChangeRequest(uuid, passwordChangeRequestDTO); }
+
+    @IsVisitor
+    @PutMapping("/{uuid}/password/confirm")
+    public void confirmPasswordChange(@PathVariable UUID uuid, @Valid @RequestBody PasswordChangeConfirmedDTO passwordChangeConfirmedDTO) throws ValidationException { passwordResetService.confirmPasswordReset(uuid, passwordChangeConfirmedDTO); }
 
     @IsStudent
     @PatchMapping("/{uuid}")
