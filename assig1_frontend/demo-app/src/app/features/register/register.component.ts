@@ -7,10 +7,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Router, RouterLink } from '@angular/router';
-import { LoginStore } from './login.store';
+import { RegisterStore } from './register.store';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   imports: [
     ReactiveFormsModule,
     RouterLink,
@@ -20,56 +20,56 @@ import { LoginStore } from './login.store';
     MatButtonModule,
     MatIconModule,
   ],
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.scss',
+  templateUrl: './register.component.html',
+  styleUrl: './register.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LoginComponent {
+export class RegisterComponent {
   private readonly formBuilder = inject(NonNullableFormBuilder);
-  private readonly loginStore = inject(LoginStore);
+  private readonly registerStore = inject(RegisterStore);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly isSubmitting = this.loginStore.isSubmitting;
-  protected readonly errorMessage = this.loginStore.errorMessage;
+  protected readonly isSubmitting = this.registerStore.isSubmitting;
+  protected readonly errorMessage = this.registerStore.errorMessage;
+  protected readonly successMessage = this.registerStore.successMessage;
 
-  protected readonly loginForm = this.formBuilder.group({
-    email: ['', [Validators.required]],
+  protected readonly registerForm = this.formBuilder.group({
+    name: ['', [Validators.required]],
+    age: [18, [Validators.required, Validators.min(1)]],
+    email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
+    role: ['student', [Validators.required]],
   });
 
   protected readonly isPasswordVisible = signal(false);
 
   protected togglePasswordVisibility(): void {
-    this.isPasswordVisible.update(visible => !visible);
+    this.isPasswordVisible.update((visible) => !visible);
   }
 
   protected submit(): void {
-    if (this.loginForm.invalid || this.isSubmitting()) {
-      this.loginForm.markAllAsTouched();
+    if (this.registerForm.invalid || this.isSubmitting()) {
+      this.registerForm.markAllAsTouched();
       return;
     }
 
-    const { email, password } = this.loginForm.getRawValue();
-    this.loginStore
-      .login({ email: email.trim(), password })
+    const { name, age, email, password, role } = this.registerForm.getRawValue();
+    this.registerStore
+      .register({
+        name: name.trim(),
+        age,
+        email: email.trim(),
+        password,
+        role: role.trim(),
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((response) => {
-        if (!response.success) {
+        if (!response.body.success) {
           return;
         }
 
-        const normalizedRole = response.role?.trim().toLowerCase();
-        console.log(response);
-        console.log(normalizedRole);
-        const targetRoute =
-          normalizedRole === 'student'
-            ? '/students'
-            : normalizedRole === 'professor'
-              ? '/professors'
-              : '/people';
-
-        void this.router.navigate([targetRoute]);
+        void this.router.navigate(['/login']);
       });
   }
 }

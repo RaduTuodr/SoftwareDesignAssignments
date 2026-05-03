@@ -1,0 +1,81 @@
+<main class="register-page" aria-labelledby="register-title">
+  <mat-card class="register-card">
+    <h1 id="register-title">Create account</h1>
+    <p class="subtitle">Register a new user, then sign in from the login page.</p>
+
+    <form [formGroup]="registerForm" (ngSubmit)="submit()" novalidate>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" autocomplete="name" required />
+        @if (registerForm.controls.name.touched && registerForm.controls.name.hasError('required')) {
+          <mat-error>Name is required.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Age</mat-label>
+        <input matInput type="number" formControlName="age" min="1" required />
+        @if (registerForm.controls.age.touched && registerForm.controls.age.hasError('required')) {
+          <mat-error>Age is required.</mat-error>
+        }
+        @if (registerForm.controls.age.touched && registerForm.controls.age.hasError('min')) {
+          <mat-error>Age must be at least 1.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" autocomplete="email" required />
+        @if (registerForm.controls.email.touched && registerForm.controls.email.hasError('required')) {
+          <mat-error>Email is required.</mat-error>
+        }
+        @if (registerForm.controls.email.touched && registerForm.controls.email.hasError('email')) {
+          <mat-error>Enter a valid email address.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          [type]="isPasswordVisible() ? 'text' : 'password'"
+          formControlName="password"
+          autocomplete="new-password"
+          required
+        />
+        <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" type="button" aria-label="Toggle password visibility">
+          <mat-icon>{{ isPasswordVisible() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (registerForm.controls.password.touched && registerForm.controls.password.hasError('required')) {
+          <mat-error>Password is required.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Role</mat-label>
+        <input matInput formControlName="role" required />
+        @if (registerForm.controls.role.touched && registerForm.controls.role.hasError('required')) {
+          <mat-error>Role is required.</mat-error>
+        }
+      </mat-form-field>
+
+      @if (errorMessage()) {
+        <p class="error-message" role="alert" aria-live="assertive">{{ errorMessage() }}</p>
+      }
+
+      @if (successMessage()) {
+        <p class="success-message" aria-live="polite">{{ successMessage() }}</p>
+      }
+
+      <button mat-flat-button color="primary" type="submit" [disabled]="isSubmitting()">
+        @if (isSubmitting()) {
+          Creating account...
+        } @else {
+          Register
+        }
+      </button>
+
+      <a class="secondary-link" routerLink="/login">Back to login</a>
+    </form>
+  </mat-card>
+</main>

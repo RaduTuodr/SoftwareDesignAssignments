@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 
-const API_URL = 'http://localhost:8080/login';
+const API_URL = 'http://localhost:8080/api/auth/login';
 
 export interface LoginRequest {
   email: string;

@@ -14,6 +14,12 @@ export const routes: Routes = [
       import('./features/login/login.component').then((m) => m.LoginComponent),
   },
   {
+    path: 'register',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./features/register/register.component').then((m) => m.RegisterComponent),
+  },
+  {
     path: 'people',
     loadComponent: () =>
       import('./features/person-list/person-list-page.component').then(

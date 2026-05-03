@@ -1,4 +1,4 @@
-.login-page {
+.register-page {
   min-height: 100dvh;
   display: grid;
   place-content: center;
@@ -6,8 +6,8 @@
   background: #f5f5f5;
 }
 
-.login-card {
-  width: min(100%, 26rem);
+.register-card {
+  width: min(100%, 28rem);
   padding: 1.5rem;
 }
 
@@ -26,14 +26,24 @@ form {
   width: 100%;
 }
 
-.error-message {
+.error-message,
+.success-message {
   margin: 0;
   padding: 0.625rem 0.75rem;
   border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+.error-message {
   border: 1px solid #b3261e;
   background: #f9dedc;
   color: #410e0b;
-  font-weight: 500;
+}
+
+.success-message {
+  border: 1px solid #0f6b3d;
+  background: #dff7e5;
+  color: #0b3b23;
 }
 
 .secondary-link {
