@@ -32,11 +32,11 @@ public class DataSeeder {
         List<CourseCreateDTO> courses = loadFromJson("courses.json", new TypeReference<List<CourseCreateDTO>>() {});
         List<EnrollmentBulkDTO> enrollments = loadFromJson("enrollments.json", new TypeReference<List<EnrollmentBulkDTO>>() {});
 
-        personService.addPeople(people);
-        studentService.addStudents(students);
-        professorService.addProfessors(professors);
-        courseService.addCourses(courses);
-        enrollmentService.addEnrollments(enrollments);
+        if (personService.getPeople().isEmpty()) personService.addPeople(people);
+        if (studentService.getStudents().isEmpty()) studentService.addStudents(students);
+        if (professorService.getProfessors().isEmpty()) professorService.addProfessors(professors);
+        if (courseService.getCourses().isEmpty()) courseService.addCourses(courses);
+        if (enrollmentService.getEnrollments().isEmpty()) enrollmentService.addEnrollments(enrollments);
     }
 
     private <T> List<T> loadFromJson(String filename, TypeReference<List<T>> typeReference) throws IOException {

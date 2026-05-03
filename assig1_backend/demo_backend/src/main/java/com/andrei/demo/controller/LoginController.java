@@ -31,9 +31,7 @@ public class LoginController {
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponseDTO> register(@RequestBody RegisterRequestDTO registerRequestDTO) {
-        System.out.println("Arrived here.");
         RegisterResponseDTO registerResponseDTO = loginService.register(registerRequestDTO);
-        System.out.println(registerResponseDTO);
         if(registerResponseDTO.success()) {
             return ResponseEntity.ok(registerResponseDTO);
         } else {
