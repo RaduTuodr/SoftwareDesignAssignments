@@ -1,6 +1,10 @@
 <mat-toolbar color="primary" class="page-toolbar">
   <span class="toolbar-title">Student Manager</span>
   <span class="toolbar-spacer" aria-hidden="true"></span>
+  <button mat-button type="button" (click)="openPasswordUpdate()" aria-label="Update password">
+    <mat-icon aria-hidden="true">lock_reset</mat-icon>
+    Update Password
+  </button>
   <button mat-button type="button" (click)="logout()" aria-label="Sign out">
     <mat-icon aria-hidden="true">logout</mat-icon>
     Logout

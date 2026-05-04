@@ -13,6 +13,9 @@ export interface LoginResponse {
   success: boolean;
   role: string | null;
   errorMessage: string | null;
+  id?: string | null;
+  uuid?: string | null;
+  personId?: string | null;
   accessToken?: string | null;
   expiresAt?: number | null;
 }

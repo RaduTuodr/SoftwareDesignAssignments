@@ -141,4 +141,8 @@ export class ProfessorListPageComponent {
     this.loginStore.logout();
     void this.router.navigate(['/login']);
   }
+
+  protected openPasswordUpdate(): void {
+    void this.router.navigate(['/reset-password']);
+  }
 }

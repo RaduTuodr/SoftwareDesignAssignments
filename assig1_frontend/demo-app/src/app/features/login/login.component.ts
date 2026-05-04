@@ -51,8 +51,9 @@ export class LoginComponent {
     }
 
     const { email, password } = this.loginForm.getRawValue();
+    const normalizedEmail = email.trim();
     this.loginStore
-      .login({ email: email.trim(), password })
+      .login({ email: normalizedEmail, password })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((response) => {
         if (!response.success) {

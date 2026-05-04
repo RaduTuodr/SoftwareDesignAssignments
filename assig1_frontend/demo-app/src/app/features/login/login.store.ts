@@ -1,12 +1,20 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { catchError, finalize, map, Observable, of, tap } from 'rxjs';
+import { catchError, finalize, forkJoin, map, Observable, of, tap } from 'rxjs';
 import { LoginRequest, LoginResponse, LoginResult, LoginService } from '../../services/login.service';
+import { Person } from '../../models/person.model';
+import { Professor } from '../../models/professor.model';
+import { Student } from '../../models/student.model';
+import { PersonService } from '../../services/person.service';
+import { ProfessorService } from '../../services/professor.service';
+import { StudentService } from '../../services/student.service';
 import { TokenService } from '../../services/token.service';
 
 interface AuthSnapshot {
   isAuthenticated: boolean;
   role: string | null;
+  userId: string | null;
+  email: string | null;
 }
 
 const STORAGE_KEY = 'demo-app-auth';
@@ -15,11 +23,16 @@ const STORAGE_KEY = 'demo-app-auth';
 export class LoginStore {
   private readonly loginService = inject(LoginService);
   private readonly tokenService = inject(TokenService);
+  private readonly personService = inject(PersonService);
+  private readonly studentService = inject(StudentService);
+  private readonly professorService = inject(ProfessorService);
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly isAuthenticated = signal(false);
   readonly role = signal<string | null>(null);
+  readonly userId = signal<string | null>(null);
+  readonly email = signal<string | null>(null);
 
   constructor() {
     this.restoreAuthState();
@@ -28,6 +41,7 @@ export class LoginStore {
   login(request: LoginRequest): Observable<LoginResponse> {
     this.errorMessage.set(null);
     this.isSubmitting.set(true);
+    this.email.set(request.email.trim());
 
     return this.loginService.login(request).pipe(
       tap((result) => this.applyLoginResult(result)),
@@ -54,6 +68,7 @@ export class LoginStore {
     if (response.success) {
       this.isAuthenticated.set(true);
       this.role.set(response.role);
+      this.userId.set(this.resolveUserId(response, authorizationHeader));
       this.errorMessage.set(null);
       const accessToken = this.resolveAccessToken(response, authorizationHeader);
       const expiresAt = this.resolveExpiresAt(response, accessToken);
@@ -103,6 +118,8 @@ export class LoginStore {
       const snapshot = JSON.parse(stored) as AuthSnapshot;
       this.isAuthenticated.set(snapshot.isAuthenticated);
       this.role.set(snapshot.role ?? null);
+      this.userId.set(snapshot.userId ?? null);
+      this.email.set(snapshot.email ?? null);
     } catch {
       this.clearSession();
     }
@@ -112,6 +129,8 @@ export class LoginStore {
     const snapshot: AuthSnapshot = {
       isAuthenticated: this.isAuthenticated(),
       role: this.role(),
+      userId: this.userId(),
+      email: this.email(),
     };
 
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
@@ -120,6 +139,8 @@ export class LoginStore {
   private clearSession(errorMessage: string | null = null): void {
     this.isAuthenticated.set(false);
     this.role.set(null);
+    this.userId.set(null);
+    this.email.set(null);
     this.errorMessage.set(errorMessage);
     this.tokenService.clearToken();
     sessionStorage.removeItem(STORAGE_KEY);
@@ -152,15 +173,105 @@ export class LoginStore {
     return this.decodeJwtExpiry(accessToken);
   }
 
+  private resolveUserId(response: LoginResponse, authorizationHeader: string | null): string | null {
+    const responseUserId = response.personId ?? response.uuid ?? response.id ?? null;
+    if (responseUserId) {
+      return responseUserId;
+    }
+
+    const accessToken = this.resolveAccessToken(response, authorizationHeader);
+    if (!accessToken) {
+      return null;
+    }
+
+    return this.decodeJwtUserId(accessToken);
+  }
+
+  ensureUserId(): Observable<string | null> {
+    const existingUserId = this.userId();
+    if (existingUserId) {
+      return of(existingUserId);
+    }
+
+    const email = this.email()?.trim().toLowerCase();
+    if (!email) {
+      return of(null);
+    }
+
+    const normalizedRole = this.role()?.trim().toLowerCase();
+    const request$ =
+      normalizedRole === 'student'
+        ? this.studentService.getAll().pipe(map((items) => this.findIdByEmail(items, email)))
+        : normalizedRole === 'professor'
+          ? this.professorService.getAll().pipe(map((items) => this.findIdByEmail(items, email)))
+          : forkJoin({
+              persons: this.personService.getAll(),
+              students: this.studentService.getAll(),
+              professors: this.professorService.getAll(),
+            }).pipe(
+              map(({ persons, students, professors }) =>
+                this.findIdByEmail(persons, email) ??
+                this.findIdByEmail(students, email) ??
+                this.findIdByEmail(professors, email),
+              ),
+            );
+
+    return request$.pipe(
+      tap((resolvedUserId) => {
+        if (!resolvedUserId) {
+          return;
+        }
+
+        this.userId.set(resolvedUserId);
+        this.persistAuthState();
+      }),
+      catchError(() => of(null)),
+    );
+  }
+
+  private findIdByEmail(items: Array<Person | Student | Professor>, email: string): string | null {
+    const match = items.find((item) => item.email.trim().toLowerCase() === email);
+    return match?.id ?? null;
+  }
+
   private decodeJwtExpiry(token: string): number | null {
+    const payload = this.decodeJwtPayload(token);
+    return typeof payload?.exp === 'number' ? payload.exp * 1000 : null;
+  }
+
+  private decodeJwtUserId(token: string): string | null {
+    const payload = this.decodeJwtPayload(token);
+    if (!payload) {
+      return null;
+    }
+
+    const candidates = [payload.userId, payload.uuid, payload.id, payload.sub];
+    const uuidPattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    for (const candidate of candidates) {
+      if (typeof candidate === 'string' && uuidPattern.test(candidate.trim())) {
+        return candidate.trim();
+      }
+    }
+
+    return null;
+  }
+
+  private decodeJwtPayload(token: string): { exp?: number; userId?: unknown; uuid?: unknown; id?: unknown; sub?: unknown } | null {
     const parts = token.split('.');
     if (parts.length < 2) {
       return null;
     }
 
     try {
-      const payload = JSON.parse(atob(this.toBase64(parts[1]))) as { exp?: number };
-      return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+      return JSON.parse(atob(this.toBase64(parts[1]))) as {
+        exp?: number;
+        userId?: unknown;
+        uuid?: unknown;
+        id?: unknown;
+        sub?: unknown;
+      };
     } catch {
       return null;
     }

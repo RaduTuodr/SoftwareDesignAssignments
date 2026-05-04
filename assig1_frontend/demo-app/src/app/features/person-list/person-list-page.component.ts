@@ -58,6 +58,10 @@ export class PersonListPageComponent {
     void this.router.navigate(['/login']);
   }
 
+  protected openPasswordUpdate(): void {
+    void this.router.navigate(['/reset-password']);
+  }
+
   protected getPersonTypeClass(person: Person): 'role-person' | 'role-student' | 'role-professor' {
     const type = this.getPersonType(person);
     if (type === 'Student') {
