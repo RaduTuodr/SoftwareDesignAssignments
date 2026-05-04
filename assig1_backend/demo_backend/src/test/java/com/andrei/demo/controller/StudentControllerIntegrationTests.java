@@ -144,4 +144,45 @@ class StudentControllerIntegrationTests {
                         .content(payload))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void getStudentRejectsVisitorRole() throws Exception {
+        mockMvc.perform(get("/student/{id}", existing.getId())
+                        .with(user("visitor@example.com").roles("VISITOR")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getStudentsRequiresAuthentication() throws Exception {
+        mockMvc.perform(get("/student"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void addStudentRejectsDuplicateEmail() throws Exception {
+        String payload = """
+                {
+                  "name": "Student Two",
+                  "password": "Strong456!",
+                  "age": 22,
+                  "email": "student.one@example.com",
+                  "registrationNumber": "REG-101",
+                  "graduationYear": 2028
+                }
+                """;
+
+        mockMvc.perform(post("/student")
+                        .with(user("admin@example.com").roles("ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.email").value("Email student.one@example.com already exists"));
+    }
+
+    @Test
+    void getStudentRejectsMalformedUuid() throws Exception {
+        mockMvc.perform(get("/student/{id}", "not-a-uuid")
+                        .with(user("student.one@example.com").roles("STUDENT")))
+                .andExpect(status().isBadRequest());
+    }
 }

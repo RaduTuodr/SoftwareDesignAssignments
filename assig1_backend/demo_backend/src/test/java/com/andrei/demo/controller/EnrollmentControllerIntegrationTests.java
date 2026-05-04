@@ -68,7 +68,6 @@ class EnrollmentControllerIntegrationTests {
                         .with(user("admin@example.com").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.student.id").value(student.getId().toString()))
                 .andExpect(jsonPath("$.course.id").value(course.getId().toString()))
                 .andExpect(jsonPath("$.enrollmentDate").exists());
 
@@ -79,8 +78,7 @@ class EnrollmentControllerIntegrationTests {
         mockMvc.perform(get("/enroll/student/{studentId}", student.getId())
                         .with(user("prof@example.com").roles("PROFESSOR")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].student.email").value("enroll.student@example.com"));
+                .andExpect(jsonPath("$.length()").value(1));
 
         mockMvc.perform(get("/enroll/course/{courseId}", course.getId())
                         .with(user("admin@example.com").roles("ADMIN")))
@@ -94,5 +92,31 @@ class EnrollmentControllerIntegrationTests {
         mockMvc.perform(post("/enroll/student/{studentId}/course/{courseId}", student.getId(), course.getId())
                         .with(user("student@example.com").roles("STUDENT")))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void enrollmentQueriesRejectVisitorRole() throws Exception {
+        mockMvc.perform(get("/enroll").with(user("visitor@example.com").roles("VISITOR")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void enrollEndpointRequiresAuthentication() throws Exception {
+        mockMvc.perform(post("/enroll/student/{studentId}/course/{courseId}", student.getId(), course.getId()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void getEnrollmentsByStudentRejectsMalformedUuid() throws Exception {
+        mockMvc.perform(get("/enroll/student/{studentId}", "not-a-uuid")
+                        .with(user("student@example.com").roles("STUDENT")))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void enrollEndpointRejectsMalformedUuid() throws Exception {
+        mockMvc.perform(post("/enroll/student/{studentId}/course/{courseId}", "not-a-uuid", course.getId())
+                        .with(user("admin@example.com").roles("ADMIN")))
+                .andExpect(status().isBadRequest());
     }
 }

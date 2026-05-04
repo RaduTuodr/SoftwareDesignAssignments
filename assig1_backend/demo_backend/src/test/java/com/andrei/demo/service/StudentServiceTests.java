@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,13 +51,13 @@ class StudentServiceTests {
     void getStudentByIdThrowsWhenMissing() {
         UUID id = UUID.randomUUID();
         when(studentRepository.findById(id)).thenReturn(Optional.empty());
-        assertThrows(ValidationException.class, () -> studentService.getStudentById(id));
+        assertThrows(NoSuchElementException.class, () -> studentService.getStudentById(id));
     }
 
     @Test
     void getStudentByEmailThrowsWhenMissing() {
         when(studentRepository.findByEmail("x@x.com")).thenReturn(Optional.empty());
-        assertThrows(ValidationException.class, () -> studentService.getStudentByEmail("x@x.com"));
+        assertThrows(NoSuchElementException.class, () -> studentService.getStudentByEmail("x@x.com"));
     }
 
     @Test
@@ -70,7 +71,7 @@ class StudentServiceTests {
     }
 
     @Test
-    void addStudentSavesEntity() {
+    void addStudentSavesEntity() throws DuplicateEmailException {
         StudentCreateDTO dto = new StudentCreateDTO();
         dto.setEmail("new@example.com");
         dto.setName("N");
@@ -82,14 +83,10 @@ class StudentServiceTests {
         when(personRepository.existsByEmail("new@example.com")).thenReturn(false);
         when(studentRepository.save(any(Student.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        try {
-            Student result = studentService.addStudent(dto);
+        Student result = studentService.addStudent(dto);
 
-            assertEquals("R1", result.getRegistrationNumber());
-            assertEquals(2028, result.getGraduationYear());
-        } catch (ValidationException e) {
-            fail("ValidationException should not be thrown");
-        }
+        assertEquals("R1", result.getRegistrationNumber());
+        assertEquals(2028, result.getGraduationYear());
     }
 
     @Test

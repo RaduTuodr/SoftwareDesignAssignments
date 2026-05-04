@@ -7,6 +7,6 @@ public record RegisterRequestDTO (
     Integer age,
     String email,
     String password,
-    RoleName roleName
+    String role
 ) {
 }

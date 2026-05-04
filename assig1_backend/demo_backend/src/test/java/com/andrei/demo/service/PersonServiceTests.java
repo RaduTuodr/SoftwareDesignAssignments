@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,8 @@ class PersonServiceTests {
 
     @Mock
     private PersonRepository personRepository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private PersonService personService;
@@ -62,7 +65,7 @@ class PersonServiceTests {
     }
 
     @Test
-    void addPersonSavesMappedEntity() {
+    void addPersonSavesMappedEntity() throws ValidationException {
         PersonCreateDTO dto = new PersonCreateDTO();
         dto.setName("Alice");
         dto.setAge(22);
@@ -70,16 +73,14 @@ class PersonServiceTests {
         dto.setPassword("Strong123!");
 
         when(personRepository.existsByEmail(dto.getEmail())).thenReturn(false);
+        when(passwordEncoder.encode(dto.getPassword())).thenReturn("encoded-password");
         when(personRepository.save(any(Person.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        try {
-            Person result = personService.addPerson(dto);
+        Person result = personService.addPerson(dto);
 
-            assertEquals("Alice", result.getName());
-            assertEquals("alice@example.com", result.getEmail());
-        } catch (ValidationException e) {
-            fail("ValidationException should not be thrown");
-        }
+        assertEquals("Alice", result.getName());
+        assertEquals("alice@example.com", result.getEmail());
+        assertEquals("encoded-password", result.getPassword());
     }
 
     @Test

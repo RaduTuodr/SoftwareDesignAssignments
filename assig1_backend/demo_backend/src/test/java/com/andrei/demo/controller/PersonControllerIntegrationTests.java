@@ -11,8 +11,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -79,7 +79,7 @@ public class PersonControllerIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").value("Alice Smith"))
-                .andExpect(jsonPath("$.password").value("Securepass123!@#"))
+                .andExpect(jsonPath("$.password").isNotEmpty())
                 .andExpect(jsonPath("$.age").value(28))
                 .andExpect(jsonPath("$.email").value("alice.smith@example.com"));
     }
@@ -118,6 +118,46 @@ public class PersonControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validPersonJson))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void testGetPeopleRejectsVisitorRole() throws Exception {
+        mockMvc.perform(get("/person").with(user("visitor@example.com").roles("VISITOR")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void testAddPersonRejectsDuplicateEmail() throws Exception {
+        String duplicateEmailJson = """
+                {
+                  "name": "Another John",
+                  "password": "Securepass123!@#",
+                  "age": 31,
+                  "email": "john.doe@example.com"
+                }
+                """;
+
+        mockMvc.perform(post("/person")
+                        .with(user("admin@example.com").roles("ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(duplicateEmailJson))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.email").value("Email john.doe@example.com already exists"));
+    }
+
+    @Test
+    void testGetPersonByIdRequiresAuthentication() throws Exception {
+        Person person = personRepository.findAll().getFirst();
+
+        mockMvc.perform(get("/person/{id}", person.getId()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testGetPersonByIdRejectsMalformedUuid() throws Exception {
+        mockMvc.perform(get("/person/{id}", "not-a-uuid")
+                        .with(user("student@example.com").roles("STUDENT")))
+                .andExpect(status().isBadRequest());
     }
 
 

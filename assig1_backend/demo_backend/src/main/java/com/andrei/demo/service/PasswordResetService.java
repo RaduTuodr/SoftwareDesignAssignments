@@ -1,5 +1,7 @@
 package com.andrei.demo.service;
 
+import com.andrei.demo.config.exceptions.ExpiredCodeException;
+import com.andrei.demo.config.exceptions.InvalidCodeException;
 import com.andrei.demo.config.exceptions.ValidationException;
 import com.andrei.demo.model.Code;
 import com.andrei.demo.model.Person;
@@ -8,6 +10,7 @@ import com.andrei.demo.model.dto.PasswordChangeRequestDTO;
 import com.andrei.demo.repository.CodeRepository;
 import com.andrei.demo.repository.PersonRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -20,6 +23,8 @@ import java.util.UUID;
 public class PasswordResetService {
 
     private final PersonRepository personRepository;
+
+    private final PasswordEncoder passwordEncoder;
 
     private final MessageService messageService;
 
@@ -36,6 +41,7 @@ public class PasswordResetService {
         Code code = new Code();
         code.setCode(generateCode());
         code.setExpirationDate(new Date(System.currentTimeMillis() + 5 * 60 * 1000));
+        code.setPersonUuid(uuid);
         codeRepository.save(code);
 
         messageService.sendMessage(passwordChangeDTO.phoneNumber(), code.getCode());
@@ -47,18 +53,24 @@ public class PasswordResetService {
             throw new ValidationException("Person with id " + uuid + " not found");
         }
 
+        System.out.println("Confirm password reset for person with id " + uuid);
+
         Person person = personOptional.get();
         Code code = codeRepository.findTopByPersonUuidOrderByExpirationDateDesc((uuid)).orElseThrow(() -> new ValidationException("No code found for person with id " + uuid));
 
+        if (!passwordEncoder.matches(passwordChangeConfirmedDTO.oldPassword(), person.getPassword())) {
+            throw new ValidationException("Old password does not match");
+        }
+
         if(code.getExpirationDate().before(new Date())) {
-            throw new ValidationException("Code has expired");
+            throw new ExpiredCodeException("Code has expired");
         }
 
         if(!code.getCode().equals(passwordChangeConfirmedDTO.code())) {
-            throw new ValidationException("Invalid code");
+            throw new InvalidCodeException("Invalid code");
         }
 
-         person.setPassword(passwordChangeConfirmedDTO.newPassword());
+         person.setPassword(passwordEncoder.encode(passwordChangeConfirmedDTO.newPassword()));
          personRepository.save(person);
          codeRepository.delete(code);
         }

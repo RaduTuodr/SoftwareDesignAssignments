@@ -23,10 +23,12 @@ public class LoginService {
 
     private final JwtService jwtService;
     private final PersonService personService;
+    private final StudentService studentService;
+    private final ProfessorService professorService;
 
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
         Optional<Person> maybePerson = personRepository.findByEmail(loginRequestDTO.email());
-        if(maybePerson.isEmpty()) {
+        if (maybePerson.isEmpty()) {
             return new LoginResponseDTO(
                     false,
                     null,
@@ -58,25 +60,67 @@ public class LoginService {
 
     public RegisterResponseDTO register(RegisterRequestDTO registerRequestDTO) {
         Optional<Person> maybePerson = personRepository.findByEmail(registerRequestDTO.email());
-        if(maybePerson.isPresent()) {
+        if (maybePerson.isPresent()) {
             return new RegisterResponseDTO(
                     false,
-                    "Person with email " + registerRequestDTO.email() + " already exists!");
+                    "Person with email " + registerRequestDTO.email() + " already exists!"
+            );
         }
 
-        PersonCreateDTO personCreateDTO = new PersonCreateDTO(
-                registerRequestDTO.name(),
-                registerRequestDTO.password(),
-                registerRequestDTO.age(),
-                registerRequestDTO.email()
-        );
         try {
-            System.out.println("Before saving " + personCreateDTO);
-            personService.addPerson(personCreateDTO);
+            System.out.println(registerRequestDTO);
+            String role = registerRequestDTO.role().toLowerCase();
+
+            switch (role) {
+                case "visitor": {
+                    PersonCreateDTO dto = new PersonCreateDTO(
+                            registerRequestDTO.name(),
+                            passwordEncoder.encode(registerRequestDTO.password()),
+                            registerRequestDTO.age(),
+                            registerRequestDTO.email()
+                    );
+                    personService.addPerson(dto);
+                    break;
+                }
+
+                case "student": {
+                    StudentCreateDTO dto = new StudentCreateDTO();
+                    dto.setName(registerRequestDTO.name());
+                    dto.setPassword(passwordEncoder.encode(registerRequestDTO.password()));
+                    dto.setAge(registerRequestDTO.age());
+                    dto.setEmail(registerRequestDTO.email());
+                    dto.setRegistrationNumber(null);
+                    dto.setGraduationYear(null);
+
+                    studentService.addStudent(dto);
+                    break;
+                }
+
+                case "professor": {
+                    ProfessorCreateDTO dto = new ProfessorCreateDTO();
+                    dto.setName(registerRequestDTO.name());
+                    dto.setPassword(passwordEncoder.encode(registerRequestDTO.password()));
+                    dto.setAge(registerRequestDTO.age());
+                    dto.setEmail(registerRequestDTO.email());
+                    dto.setDepartment(null);
+                    dto.setAcademicRank(null);
+
+                    professorService.addProfessor(dto);
+                    break;
+                }
+
+                default:
+                    return new RegisterResponseDTO(
+                            false,
+                            "Invalid role: " + registerRequestDTO.role()
+                    );
+            }
+
             return new RegisterResponseDTO(
                     true,
                     "Person with email " + registerRequestDTO.email() + " successfully registered!"
             );
+
         } catch (DuplicateEmailException e) {
             return new RegisterResponseDTO(
                     false,
